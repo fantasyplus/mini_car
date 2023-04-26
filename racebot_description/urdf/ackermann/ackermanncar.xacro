@@ -11,7 +11,6 @@
         <visual>
             <geometry>
                 <box size="0.28 0.1 0.03"/>
-                <!-- <mesh filename="package://tianracer_description/meshes/base_link.STL" /> -->
             </geometry>
             <!-- <origin xyz="0 0 -0.023" rpy="0 0 0" /> -->
             <origin xyz="0 0 0" rpy="0 0 0" />
@@ -92,8 +91,6 @@
 
 
 
-
-
     <link name="left_front_wheel">
         <visual>
             <geometry>
@@ -126,10 +123,7 @@
     </joint>
      <xacro:wheel_transmission name="left_front_wheel" />
 
-
-
-
-<link name="right_steering_hinge">
+    <link name="right_steering_hinge">
         <visual>
             <geometry>
                  <cylinder radius="0.01" length="0.005" />
@@ -161,12 +155,7 @@
     </joint>
     <xacro:steering_hinge_transmission name="right_steering_hinge" />
 
-
-
-
-
-
-     <link name="right_front_wheel">
+    <link name="right_front_wheel">
         <visual>
             <geometry>
                 <cylinder radius="0.033" length="0.02" />
@@ -396,6 +385,6 @@
         <axis xyz="0 0 1" />
     </joint>
 
-  <xacro:include filename="$(find racebot_description)/urdf/ackermann/racecar.gazebo" />
+  <xacro:include filename="$(find racebot_description)/urdf/ackermann/ackermanncar.gazebo" />
 
 </robot>

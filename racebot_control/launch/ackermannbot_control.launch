@@ -3,7 +3,7 @@
 <launch>
 
   <!-- Load joint controller configurations from YAML file to parameter server -->
-  <rosparam file="$(find racebot_control)/config/racebot_control.yaml" command="load"/>
+  <rosparam file="$(find racebot_control)/config/ackermannbot_control.yaml" command="load"/>
 
   <!-- load the controllers -->
   <node name="controller_manager" pkg="controller_manager" type="spawner" respawn="false"
@@ -13,7 +13,6 @@
                                             joint_state_controller"/>
 
 	<!--运行joint_state_publisher节点，发布机器人关节状态-->
-	<!--<node name = "robot_state_publisher" pkg = "robot_state_publisher" type = "state_publisher">-->
 	<node name= "robot_state_publisher" pkg= "robot_state_publisher" type= "robot_state_publisher">
 		<remap from="/joint_states" to="/racebot/joint_states"/>
 	</node>

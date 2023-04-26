@@ -11,7 +11,7 @@
 
     <rosparam file="$(find racebot_gazebo)/config/teb/move_base_params.yaml" command="load" />
     <rosparam file="$(find racebot_gazebo)/config/teb/base_global_planner_params.yaml" command="load" />
-    <rosparam file="$(find racebot_gazebo)/config/teb/teb_local_planner_params.yaml" command="load" />
+    <rosparam file="$(find racebot_gazebo)/config/teb/teb_local_planner_params_mecanum.yaml" command="load" />
   </node>
   
 

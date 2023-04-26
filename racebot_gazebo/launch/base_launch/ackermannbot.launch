@@ -25,14 +25,14 @@
   </include>
 
 	<!-- 加载机器人模型描述参数 -->
-	<param name="robot_description" command="$(find xacro)/xacro --inorder '$(find racebot_description)/urdf/ackermann/racecar.xacro'"/>
+	<param name="robot_description" command="$(find xacro)/xacro --inorder '$(find racebot_description)/urdf/ackermann/ackermanncar.xacro'"/>
 
   <!-- 在gazebo中加载机器人模型-->
   <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
         args="-urdf -model racebot -param robot_description -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -R $(arg R_pos) -P $(arg P_pos) -Y $(arg Y_pos)"/> 
           
   <!-- ros_control racecar launch file -->
-  <include file="$(find racebot_control)/launch/racebot_control.launch" ns="/"/>
+  <include file="$(find racebot_control)/launch/ackermannbot_control.launch" ns="/"/>
 
     <!--Launch the simulation joystick control-->
   <!-- <rosparam command="load" file="$(find racebot_gazebo)/config/keyboard_teleop.yaml" />
