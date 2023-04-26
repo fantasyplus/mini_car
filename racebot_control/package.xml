@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>racebot_control</name>
+  <version>0.0.0</version>
+  <description>The racebot_control package</description>
+
+  <maintainer email="fantasyplus123@gmail.com"></maintainer>
+
+  <license>TODO</license>
+
+  <depend>ackermann_msgs</depend>
+  <depend>joint_state_publisher_gui</depend>
+  <depend>ros_control</depend>
+  <depend>ros_controllers</depend>
+  <depend>gmapping</depend>
+  <depend>teb_local_planner</depend>
+  <depend>navigation</depend>
+</package>
