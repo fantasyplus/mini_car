@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
     <!-- 运行move_base节点 -->
-    <include file="$(find racebot_gazebo)/launch/base_launch/teb_base.launch"/>
+    <include file="$(find racebot_gazebo)/launch/base_launch/teb_base_mecanum.launch"/>
 
     <include file="$(find racebot_gazebo)/launch/base_launch/slam_gmapping.launch"/>
 
