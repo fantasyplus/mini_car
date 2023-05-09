@@ -1,4 +1,0 @@
-<launch>
-    <!-- Vision node -->
-    <node pkg="vision_detection" name="vision_detection" type="vision" output="screen"/>
-</launch>
