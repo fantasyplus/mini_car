@@ -20,4 +20,7 @@
 
     <!-- 运行rviz -->
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find racebot_gazebo)/rviz/nav.rviz"/>
+
+    <!-- qr code detection -->
+    <include file="$(find qr_detector)/launch/detector.launch" />
 </launch>
