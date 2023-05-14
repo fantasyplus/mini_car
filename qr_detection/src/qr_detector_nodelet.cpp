@@ -28,7 +28,7 @@ namespace qr_detector
                                             std::bind(&QrDetectorNodelet::disconnectCallback, this));
         img_subscriber_ = it_.subscribe("image", 1, &QrDetectorNodelet::imageCallback, this);
 
-        ROS_WARN("Initializing nodelet... [%s]", nh_.getNamespace().c_str());
+        ROS_INFO("Initializing nodelet... [%s]", nh_.getNamespace().c_str());
     }
 
     void QrDetectorNodelet::connectCallback()
@@ -37,7 +37,7 @@ namespace qr_detector
         // ROS_INFO("img_subscriber_ is null? %d", img_subscriber_ == nullptr);
         if (!img_subscriber_ && tags_publisher_.getNumSubscribers() > 0)
         {
-            ROS_WARN("Connecting to image topic.");
+            ROS_INFO("Connecting to image topic.");
             img_subscriber_ = it_.subscribe("image", 1, &QrDetectorNodelet::imageCallback, this);
         }
     }
@@ -46,7 +46,7 @@ namespace qr_detector
     {
         if (tags_publisher_.getNumSubscribers() == 0)
         {
-            ROS_WARN("Unsubscribing from image topic.");
+            ROS_INFO("Unsubscribing from image topic.");
             img_subscriber_.shutdown();
         }
     }
@@ -55,7 +55,7 @@ namespace qr_detector
     {
         cv_bridge::CvImageConstPtr cv_image;
         std_msgs::String qr_msg;
-        ROS_INFO("Image received.");
+        // ROS_INFO("Image received.");
         try
         {
             cv_image = cv_bridge::toCvShare(image, sensor_msgs::image_encodings::BGR8);

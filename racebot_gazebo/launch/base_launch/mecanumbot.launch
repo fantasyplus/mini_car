@@ -28,14 +28,14 @@
 	<param name="robot_description" command="$(find xacro)/xacro --inorder '$(find racebot_description)/urdf/mecanum/mecanumcar.xacro'"/>
 
   <!-- 在gazebo中加载机器人模型-->
-  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="log"
         args="-urdf -model racebot -param robot_description -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -R $(arg R_pos) -P $(arg P_pos) -Y $(arg Y_pos)"/> 
           
   <rosparam file="$(find racebot_control)/config/macanumbot_control.yaml" command="load"/>
 
   <!-- load the controllers -->
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
-    output="screen" ns="/racebot" args="joint_state_controller"/>
+    output="log" ns="/racebot" args="joint_state_controller"/>
 
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
     <param name="publish_frequency" type="double" value="30.0" />

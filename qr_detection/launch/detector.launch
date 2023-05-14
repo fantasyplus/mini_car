@@ -2,7 +2,8 @@
     <node pkg="nodelet"
           type="nodelet"
           name="qr_detector"
-          args="standalone qr_detector/qr_detector_nodelet">
+          args="standalone qr_detector/qr_detector_nodelet"
+          output="screen">
         <remap from="image" to="/rrbot/camera1/image_raw"/>
     </node>
 </launch>
