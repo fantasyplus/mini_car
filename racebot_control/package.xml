@@ -15,5 +15,5 @@
   <!-- <depend>ros_controllers</depend> -->
   <depend>gmapping</depend>
   <depend>teb_local_planner</depend>
-  <!-- <depend>navigation</depend> -->
+  <depend>navigation</depend>
 </package>

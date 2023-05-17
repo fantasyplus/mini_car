@@ -41,6 +41,8 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/thread.hpp>
+#include "geometry_msgs/PointStamped.h"
+#include "geometry_msgs/PoseStamped.h"
 
 #include <geometry_msgs/Twist.h>
 
@@ -58,7 +60,7 @@ namespace move_base
                                             blp_loader_("nav_core", "nav_core::BaseLocalPlanner"),  // std::string package, std::string base_class
                                             recovery_loader_("nav_core", "nav_core::RecoveryBehavior"),
                                             planner_plan_(NULL), latest_plan_(NULL), controller_plan_(NULL),
-                                            runPlanner_(false), setup_(false), p_freq_change_(false), c_freq_change_(false), new_global_plan_(false)
+                                            runPlanner_(false), setup_(false), p_freq_change_(false), c_freq_change_(false), new_global_plan_(false),is_waypoints_model(false)
   {
 
     as_ = new MoveBaseActionServer(ros::NodeHandle(), "move_base", boost::bind(&MoveBase::executeCb, this, _1), false);
@@ -88,6 +90,10 @@ namespace move_base
     private_nh.param("make_plan_clear_costmap", make_plan_clear_costmap_, true);
     private_nh.param("make_plan_add_unreachable_goal", make_plan_add_unreachable_goal_, true);
 
+    //waypoints file path
+    private_nh.param("waypoints_file_path", waypoints_file_path_, std::string(""));
+    private_nh.param("read_waypoints_from_file", read_waypoints_from_file_, false);
+
     // set up plan triple buffer
     // planner_plan_保存最新规划的路径，传递给latest_plan_，然后latest_plan_通过executeCycle中传给controller_plan_
     planner_plan_ = new std::vector<geometry_msgs::PoseStamped>();
@@ -111,14 +117,7 @@ namespace move_base
     ros::NodeHandle simple_nh("move_base_simple");
     goal_sub_ = simple_nh.subscribe<geometry_msgs::PoseStamped>("goal", 1, boost::bind(&MoveBase::goalCB, this, _1));
 
-    //通过rviz设置gazebo小车位置
-
-    ros::NodeHandle initial_nh;
-    initial_pose_sub_ = initial_nh.subscribe<geometry_msgs::PoseWithCovarianceStamped>("initialpose", 1, &MoveBase::initialPoseCB, this);
-    set_pose_client = initial_nh.serviceClient<gazebo_msgs::SetModelState>("/gazebo/set_model_state");
-
-    //发送固定死的rviz目标点（大论文用）
-    fixed_goal_pub_ = initial_nh.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 0);
+    waypoints_sub_=nh.subscribe("clicked_point", 1, &MoveBase::waypointsCB, this);
 
     // we'll assume the radius of the robot to be consistent with what's specified for the costmaps
     private_nh.param("local_costmap/inscribed_radius", inscribed_radius_, 0.325);
@@ -166,9 +165,6 @@ namespace move_base
     // Start actively updating costmaps based on sensor data
     planner_costmap_ros_->start();
     controller_costmap_ros_->start();
-
-    // advertise a service for getting a plan
-    make_plan_srv_ = private_nh.advertiseService("make_plan", &MoveBase::planService, this);
 
     // advertise a service for clearing the costmaps
     clear_costmaps_srv_ = private_nh.advertiseService("clear_costmaps", &MoveBase::clearCostmapsService, this);
@@ -306,66 +302,67 @@ namespace move_base
     last_config_ = config;
   }
 
-  void MoveBase::initialPoseCB(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr &pose)
+  void MoveBase::goalCB(const geometry_msgs::PoseStamped::ConstPtr &goal)
   {
-
-    gazebo_msgs::SetModelState objstate;
-
-    if (use_fixed_start_goal)
+    if(!read_waypoints_from_file_)
     {
-      //不用回调的pose，用固定值
-      geometry_msgs::PoseWithCovarianceStamped temp_start;
-      temp_start.header.stamp = ros::Time::now();
-      temp_start.header.frame_id = "map";
-      temp_start.pose.pose.position.x = -26.6068134308;
-      temp_start.pose.pose.position.y = -8.05718231201;
-      temp_start.pose.pose.position.z = 0.0;
-      temp_start.pose.pose.orientation.x = 0.0;
-      temp_start.pose.pose.orientation.y = 0.0;
-      temp_start.pose.pose.orientation.z = -0.0256453070206;
-      temp_start.pose.pose.orientation.w = 0.999671105028;
+      waypoints_.push_back(*goal);
 
-      objstate.request.model_state.model_name = "racebot";
-      objstate.request.model_state.pose = temp_start.pose.pose;
-      objstate.request.model_state.reference_frame = "map";
+      ROS_INFO("move_base_goalCB:In ROS goal callback, wrapping the PoseStamped in the action message and re-sending to the server.");
+      move_base_msgs::MoveBaseActionGoal action_goal;
+      action_goal.header.stamp = ros::Time::now();
+      action_goal.goal.target_pose = *goal;
 
-      set_pose_client.call(objstate);
-
-      sleep(1);
-
-      //发送固定目标点
-      geometry_msgs::PoseStamped temp_goal;
-      temp_goal.header.stamp = ros::Time::now();
-      temp_goal.header.frame_id = "map";
-      temp_goal.pose.position.x = 16.1531829834;
-      temp_goal.pose.position.y = 6.62397861481;
-      temp_goal.pose.position.z = 0.0;
-      temp_goal.pose.orientation.x = 0.0;
-      temp_goal.pose.orientation.y = 0.0;
-      temp_goal.pose.orientation.z = 0.0330818906742;
-      temp_goal.pose.orientation.w = 0.999452644456;
-      fixed_goal_pub_.publish(temp_goal);
+      action_goal_pub_.publish(action_goal);
     }
-    else
-    {
-      ROS_INFO("move_base: set gazebo model state from rviz /initialpose");
+    else{
+      waypoints_.clear();
 
-      objstate.request.model_state.model_name = "racebot";
-      objstate.request.model_state.pose = pose->pose.pose;
-      objstate.request.model_state.reference_frame = "map";
+      std::ifstream file(waypoints_file_path_);
+      if(!file){
+        ROS_ERROR("move_base_goalCB:Failed to open file %s", waypoints_file_path_.c_str());
+        return;
+      }
 
-      set_pose_client.call(objstate);
+      std::string line;
+      while(std::getline(file, line,' ')){
+        std::istringstream iss(line);
+        double x, y;
+        if(!(iss >> x >> y)){
+          ROS_ERROR("move_base_goalCB:Failed to read file %s", waypoints_file_path_.c_str());
+          break;
+        }
+
+        geometry_msgs::PoseStamped waypoint;
+        waypoint.header.frame_id = "map";
+        waypoint.header.stamp = ros::Time::now();
+        waypoint.pose.position.x = x;
+        waypoint.pose.position.y = y;
+        waypoint.pose.orientation.w = 1.0;
+
+        waypoints_.push_back(waypoint);
+      }
+
+      ROS_INFO("move_base_goalCB: send useless goal,to triger action_goal");
+      move_base_msgs::MoveBaseActionGoal action_goal;
+      action_goal.header.stamp = ros::Time::now();
+      action_goal.goal.target_pose = *goal;
+
+      action_goal_pub_.publish(action_goal);
     }
   }
 
-  void MoveBase::goalCB(const geometry_msgs::PoseStamped::ConstPtr &goal)
-  {
-    ROS_INFO("move_base_goalCB:In ROS goal callback, wrapping the PoseStamped in the action message and re-sending to the server.");
-    move_base_msgs::MoveBaseActionGoal action_goal;
-    action_goal.header.stamp = ros::Time::now();
-    action_goal.goal.target_pose = *goal;
+  void MoveBase::waypointsCB(const geometry_msgs::PointStampedConstPtr &waypoint){
+    ROS_INFO("get waypoint x: %f, y: %f", waypoint->point.x, waypoint->point.y);
+    
+    geometry_msgs::PoseStamped waypoint_pose;
+    waypoint_pose.header = waypoint->header;
+    waypoint_pose.pose.position = waypoint->point;
+    waypoint_pose.pose.orientation.w = 1.0;
 
-    action_goal_pub_.publish(action_goal);
+    waypoints_.push_back(waypoint_pose);
+
+    is_waypoints_model=true;
   }
 
   void MoveBase::clearCostmapWindows(double size_x, double size_y)
@@ -435,123 +432,6 @@ namespace move_base
     return true;
   }
 
-  bool MoveBase::planService(nav_msgs::GetPlan::Request &req, nav_msgs::GetPlan::Response &resp)
-  {
-    if (as_->isActive())
-    {
-      ROS_ERROR("move_base must be in an inactive state to make a plan for an external user");
-      return false;
-    }
-    // make sure we have a costmap for our planner
-    if (planner_costmap_ros_ == NULL)
-    {
-      ROS_ERROR("move_base cannot make a plan for you because it doesn't have a costmap");
-      return false;
-    }
-
-    geometry_msgs::PoseStamped start;
-    // if the user does not specify a start pose, identified by an empty frame id, then use the robot's pose
-    if (req.start.header.frame_id.empty())
-    {
-      geometry_msgs::PoseStamped global_pose;
-      if (!getRobotPose(global_pose, planner_costmap_ros_))
-      {
-        ROS_ERROR("move_base cannot make a plan for you because it could not get the start pose of the robot");
-        return false;
-      }
-      start = global_pose;
-    }
-    else
-    {
-      start = req.start;
-    }
-
-    if (make_plan_clear_costmap_)
-    {
-      // update the copy of the costmap the planner uses
-      clearCostmapWindows(2 * clearing_radius_, 2 * clearing_radius_);
-    }
-
-    // first try to make a plan to the exact desired goal
-    std::vector<geometry_msgs::PoseStamped> global_plan;
-    if (!planner_->makePlan(start, req.goal, global_plan) || global_plan.empty())
-    {
-      ROS_DEBUG_NAMED("move_base", "Failed to find a plan to exact goal of (%.2f, %.2f), searching for a feasible goal within tolerance",
-                      req.goal.pose.position.x, req.goal.pose.position.y);
-
-      // search outwards for a feasible goal within the specified tolerance
-      geometry_msgs::PoseStamped p;
-      p = req.goal;
-      bool found_legal = false;
-      float resolution = planner_costmap_ros_->getCostmap()->getResolution();
-      float search_increment = resolution * 3.0;
-      if (req.tolerance > 0.0 && req.tolerance < search_increment)
-        search_increment = req.tolerance;
-      for (float max_offset = search_increment; max_offset <= req.tolerance && !found_legal; max_offset += search_increment)
-      {
-        for (float y_offset = 0; y_offset <= max_offset && !found_legal; y_offset += search_increment)
-        {
-          for (float x_offset = 0; x_offset <= max_offset && !found_legal; x_offset += search_increment)
-          {
-
-            // don't search again inside the current outer layer
-            if (x_offset < max_offset - 1e-9 && y_offset < max_offset - 1e-9)
-              continue;
-
-            // search to both sides of the desired goal
-            for (float y_mult = -1.0; y_mult <= 1.0 + 1e-9 && !found_legal; y_mult += 2.0)
-            {
-
-              // if one of the offsets is 0, -1*0 is still 0 (so get rid of one of the two)
-              if (y_offset < 1e-9 && y_mult < -1.0 + 1e-9)
-                continue;
-
-              for (float x_mult = -1.0; x_mult <= 1.0 + 1e-9 && !found_legal; x_mult += 2.0)
-              {
-                if (x_offset < 1e-9 && x_mult < -1.0 + 1e-9)
-                  continue;
-
-                p.pose.position.y = req.goal.pose.position.y + y_offset * y_mult;
-                p.pose.position.x = req.goal.pose.position.x + x_offset * x_mult;
-
-                if (planner_->makePlan(start, p, global_plan))
-                {
-                  if (!global_plan.empty())
-                  {
-
-                    if (make_plan_add_unreachable_goal_)
-                    {
-                      // adding the (unreachable) original goal to the end of the global plan, in case the local planner can get you there
-                      //(the reachable goal should have been added by the global planner)
-                      global_plan.push_back(req.goal);
-                    }
-
-                    found_legal = true;
-                    ROS_DEBUG_NAMED("move_base", "Found a plan to point (%.2f, %.2f)", p.pose.position.x, p.pose.position.y);
-                    break;
-                  }
-                }
-                else
-                {
-                  ROS_DEBUG_NAMED("move_base", "Failed to find a plan to point (%.2f, %.2f)", p.pose.position.x, p.pose.position.y);
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-
-    // copy the plan into a message to send out
-    resp.plan.poses.resize(global_plan.size());
-    for (unsigned int i = 0; i < global_plan.size(); ++i)
-    {
-      resp.plan.poses[i] = global_plan[i];
-    }
-
-    return true;
-  }
-
   MoveBase::~MoveBase()
   {
     recovery_behaviors_.clear();
@@ -610,6 +490,73 @@ namespace move_base
     {
       ROS_DEBUG_NAMED("move_base", "Failed to find a  plan to point (%.2f, %.2f)", goal.pose.position.x, goal.pose.position.y);
       return false;
+    }
+
+    return true;
+  }
+
+  bool MoveBase::makePlan(const std::vector<geometry_msgs::PoseStamped> &waypoints, std::vector<geometry_msgs::PoseStamped> &plan){
+    //全局规划和局部规划要互斥使用costmap
+    boost::unique_lock<costmap_2d::Costmap2D::mutex_t> lock(*(planner_costmap_ros_->getCostmap()->getMutex()));
+
+    // make sure to set the plan to be empty initially
+    plan.clear();
+
+    // since this gets called on handle activate
+    if (planner_costmap_ros_ == NULL)
+    {
+      ROS_ERROR("Planner costmap ROS is NULL, unable to create global plan");
+      return false;
+    }
+
+    // get the starting pose of the robot
+    geometry_msgs::PoseStamped global_pose;
+    if (!getRobotPose(global_pose, planner_costmap_ros_))
+    {
+      ROS_WARN("Unable to get starting pose of robot, unable to create global plan");
+      return false;
+    }
+
+    const geometry_msgs::PoseStamped &start = global_pose;
+
+    bool first_plan=true;
+    geometry_msgs::PoseStamped new_start;
+    std::vector<std::vector<geometry_msgs::PoseStamped>> sub_plans;
+    std::vector<geometry_msgs::PoseStamped> sub_plan;
+
+    for(auto goal:waypoints)
+    {
+      if(first_plan)
+      {
+        // if the planner fails or returns a zero length plan, planning failed
+        if (!planner_->makePlan(start, goal, sub_plan) || sub_plan.empty())
+        {
+          ROS_DEBUG_NAMED("move_base", "Failed to find a  plan to point (%.2f, %.2f)", goal.pose.position.x, goal.pose.position.y);
+          return false;
+        }
+
+        first_plan=false;
+        new_start=goal;
+        sub_plans.push_back(sub_plan);
+      }
+      else{
+        if (!planner_->makePlan(new_start, goal, sub_plan) || sub_plan.empty())
+        {
+          ROS_DEBUG_NAMED("move_base", "Failed to find a  plan to point (%.2f, %.2f)", goal.pose.position.x, goal.pose.position.y);
+          return false;
+        }
+
+        new_start=goal;
+        sub_plans.push_back(sub_plan);
+      }
+    }
+
+    for(auto sub_plan:sub_plans)
+    {
+      for(auto pose:sub_plan)
+      {
+        plan.push_back(pose);
+      }
     }
 
     return true;
@@ -713,14 +660,28 @@ namespace move_base
 
       ros::Time start_time = ros::Time::now();
 
-      // time to plan! get a copy of the goal and unlock the mutex
-      geometry_msgs::PoseStamped temp_goal = planner_goal_;
-      lock.unlock();
-      ROS_INFO("move_base_plan_thread: Planning...");
+      bool gotPlan=false;
+      if(is_waypoints_model==false)
+      {     
+        // time to plan! get a copy of the goal and unlock the mutex
+        geometry_msgs::PoseStamped temp_goal = planner_goal_;
+        lock.unlock();
+        ROS_INFO("move_base_plan_thread: Planning...");
 
-      // run planner
-      planner_plan_->clear();
-      bool gotPlan = n.ok() && makePlan(temp_goal, *planner_plan_);
+        // run planner
+        planner_plan_->clear();
+        gotPlan = n.ok() && makePlan(temp_goal, *planner_plan_);
+      }
+      else{
+        lock.unlock();
+        ROS_INFO("move_base_plan_thread: Waypoints Model Planning...");
+
+        planner_plan_->clear();
+
+        gotPlan = n.ok() && makePlan(waypoints_,*planner_plan_);
+
+        is_waypoints_model=false;
+      }
 
       if (gotPlan)
       {
@@ -1049,6 +1010,7 @@ namespace move_base
       if (tc_->isGoalReached())
       {
         ROS_INFO("move_base_executeCycle: Goal reached!");
+        waypoints_.clear();
         resetState();
 
         // disable the planner thread

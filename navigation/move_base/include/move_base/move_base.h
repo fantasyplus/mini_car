@@ -39,6 +39,7 @@
 
 #include <vector>
 #include <string>
+#include <fstream>
 
 #include <ros/ros.h>
 
@@ -50,6 +51,7 @@
 #include <nav_core/recovery_behavior.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <geometry_msgs/PointStamped.h>
 #include <costmap_2d/costmap_2d_ros.h>
 #include <costmap_2d/costmap_2d.h>
 #include <nav_msgs/GetPlan.h>
@@ -58,7 +60,9 @@
 #include <std_srvs/Empty.h>
 
 #include <dynamic_reconfigure/server.h>
+#include "geometry_msgs/PointStamped.h"
 #include "move_base/MoveBaseConfig.h"
+#include "ros/subscriber.h"
 
 namespace move_base
 {
@@ -176,6 +180,12 @@ namespace move_base
 
     geometry_msgs::PoseStamped goalToGlobalFrame(const geometry_msgs::PoseStamped &goal_pose_msg);
 
+    // waypoints related fuctions and variables
+    void waypointsCB(const geometry_msgs::PointStampedConstPtr &waypoint);
+    std::vector<geometry_msgs::PoseStamped> waypoints_;
+    bool is_waypoints_model;
+
+    bool makePlan(const std::vector<geometry_msgs::PoseStamped> &waypoints, std::vector<geometry_msgs::PoseStamped> &plan);
     /**
      * @brief This is used to wake the planner at periodic intervals.
      */
@@ -205,11 +215,14 @@ namespace move_base
     ros::Publisher current_goal_pub_, vel_pub_, action_goal_pub_, recovery_status_pub_, fixed_goal_pub_;
     ros::Subscriber goal_sub_;
     ros::Subscriber initial_pose_sub_;
+    ros::Subscriber waypoints_sub_;
     ros::ServiceClient set_pose_client;
-    ros::ServiceServer make_plan_srv_, clear_costmaps_srv_;
+    ros::ServiceServer clear_costmaps_srv_;
     bool shutdown_costmaps_, clearing_rotation_allowed_, recovery_behavior_enabled_;
     bool make_plan_clear_costmap_, make_plan_add_unreachable_goal_;
     double oscillation_timeout_, oscillation_distance_;
+    std::string waypoints_file_path_;
+    bool read_waypoints_from_file_;
 
     MoveBaseState state_;
     RecoveryTrigger recovery_trigger_;
