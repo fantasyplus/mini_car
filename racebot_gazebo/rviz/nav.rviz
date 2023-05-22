@@ -7,13 +7,14 @@ Panels:
         - /Global Options1
         - /Polygon1
       Splitter Ratio: 0.6526610255241394
-    Tree Height: 372
+    Tree Height: 363
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
     Expanded:
       - /2D Pose Estimate1
       - /2D Nav Goal1
+      - /Publish Point1
     Name: Tool Properties
     Splitter Ratio: 0.4285709857940674
   - Class: rviz/Views
@@ -354,19 +355,22 @@ Visualization Manager:
       Y std deviation: 0.5
     - Class: rviz/SetGoal
       Topic: /move_base_simple/goal
+    - Class: rviz/PublishPoint
+      Single click: true
+      Topic: /clicked_point
   Value: true
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 20.065128326416016
+      Distance: 8.200127601623535
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 1.9376161098480225
-        Y: -5.387712478637695
+        X: 7.779397010803223
+        Y: -4.106098175048828
         Z: 6.326287984848022e-5
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
@@ -376,7 +380,7 @@ Visualization Manager:
       Pitch: 1.5697963237762451
       Target Frame: <Fixed Frame>
       Value: XYOrbit (rviz)
-      Yaw: 3.128584384918213
+      Yaw: 3.123584508895874
     Saved: ~
 Window Geometry:
   Displays:
@@ -394,5 +398,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 940
-  X: 1576
-  Y: 27
+  X: 1594
+  Y: 143
