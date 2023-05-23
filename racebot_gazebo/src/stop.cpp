@@ -1,4 +1,6 @@
 #include <ros/ros.h>
+#include "geometry_msgs/Point.h"
+#include "geometry_msgs/PointStamped.h"
 #include "geometry_msgs/PoseStamped.h"
 #include "std_msgs/Bool.h"
 #include "ros/subscriber.h"
@@ -15,6 +17,9 @@
 #include <unistd.h>
 
 nav_msgs::Odometry odom;
+geometry_msgs::Twist vel;
+geometry_msgs::PointStamped stop_point;
+bool is_clicked_point = false;
 
 std::condition_variable cv;
 std::mutex mtx;
@@ -43,6 +48,19 @@ void odomCallback(const nav_msgs::Odometry::ConstPtr &msg)
     odom = *msg;
 }
 
+void velCallback(const geometry_msgs::Twist::ConstPtr &msg)
+{
+    vel = *msg;
+}
+
+void pointCallback(const geometry_msgs::PointStamped::ConstPtr &msg)
+{
+    ROS_INFO("set stop point at (%f, %f)", msg->point.x, msg->point.y);
+    stop_point = *msg;
+
+    is_clicked_point = true;
+}
+
 void readFromKeyboard(char &key)
 {
     while (1)
@@ -55,7 +73,7 @@ void readFromKeyboard(char &key)
             if (exitFlag)
             {
                 tcsetattr(STDIN_FILENO, TCSANOW, &old_tio);
-                std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+                std::this_thread::sleep_for(std::chrono::milliseconds(2000));
                 break;
             }
         }
@@ -90,29 +108,38 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "teb_stop_node");
     ros::NodeHandle nh;
 
-    ros::Subscriber odom_sub = nh.subscribe("/odom", 10, odomCallback);
+    ros::Subscriber odom_sub = nh.subscribe("/odom", 1, odomCallback);
+    ros::Subscriber vel_sub = nh.subscribe("/cmd_vel", 1, velCallback);
+    ros::Subscriber point_sub = nh.subscribe("/clicked_point", 1, pointCallback);
 
     ros::Publisher vel_pub = nh.advertise<geometry_msgs::Twist>("/cmd_vel", 10);
     ros::Publisher stop_move_base_pub = nh.advertise<std_msgs::Bool>("/stop_move_base", 10);
 
-    ros::Rate rate(10);  // 每秒执行10次循环
-
-    geometry_msgs::PoseStamped stop_pose;
-    stop_pose.pose.position.x = 10.0013618469;
-    stop_pose.pose.position.y = -4.35984659195;
-    stop_pose.pose.position.z = 0.00437545776367;
-
-    stop_pose.pose.orientation.w = 1;
+    ros::Rate rate(10);
 
     while (ros::ok())
     {
         ros::spinOnce();
 
+        geometry_msgs::PoseStamped stop_pose;
+        stop_pose.header.frame_id = "map";
+        stop_pose.pose.position.x = stop_point.point.x;
+        stop_pose.pose.position.y = stop_point.point.y;
+        stop_pose.pose.position.z = 0.05;
+
+        stop_pose.pose.orientation.w = 1;
+
         double distance = sqrt(pow(stop_pose.pose.position.x - odom.pose.pose.position.x, 2) +
                                pow(stop_pose.pose.position.y - odom.pose.pose.position.y, 2));
-        if (distance < 0.5)
+
+        ROS_INFO("car's velocity : %f", vel.linear.x);
+        ROS_INFO("Stop point at: (%f, %f)", stop_pose.pose.position.x, stop_pose.pose.position.y);
+        ROS_INFO("Car pose at: (%f, %f)", odom.pose.pose.position.x, odom.pose.pose.position.y);
+        ROS_INFO("Distance to stop point: %f\n", distance);
+
+        if (distance < 0.5 && is_clicked_point)
         {
-            ROS_INFO("enter stop area");
+            // ROS_INFO("enter stop area");
 
             geometry_msgs::Twist vel;
             vel.linear.x = 0;
