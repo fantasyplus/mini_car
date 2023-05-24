@@ -135,11 +135,12 @@ int main(int argc, char **argv)
         ROS_INFO("car's velocity : %f", vel.linear.x);
         ROS_INFO("Stop point at: (%f, %f)", stop_pose.pose.position.x, stop_pose.pose.position.y);
         ROS_INFO("Car pose at: (%f, %f)", odom.pose.pose.position.x, odom.pose.pose.position.y);
-        ROS_INFO("Distance to stop point: %f\n", distance);
+        ROS_INFO("Distance to stop point: %f", distance);
 
+        bool is_enter_stop_area=false;
         if (distance < 0.5 && is_clicked_point)
         {
-            // ROS_INFO("enter stop area");
+            ROS_INFO("---------enter stop area--------\n");
 
             geometry_msgs::Twist vel;
             vel.linear.x = 0;
@@ -148,6 +149,7 @@ int main(int argc, char **argv)
             std_msgs::Bool stop_move_base;
             if (key == 's')
             {
+                ROS_INFO("---------drive out of stop area--------");
                 stop_move_base.data = false;
                 stop_move_base_pub.publish(stop_move_base);
 
