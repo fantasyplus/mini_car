@@ -11,9 +11,9 @@
 
   <depend>ackermann_msgs</depend>
   <depend>joint_state_publisher_gui</depend>
-  <!-- <depend>ros_control</depend> -->
-  <!-- <depend>ros_controllers</depend> -->
+  <depend>ros_control</depend>
+  <depend>ros_controllers</depend>
   <depend>gmapping</depend>
   <depend>teb_local_planner</depend>
-  <!-- <depend>navigation</depend> -->
+  <depend>navigation</depend>
 </package>
