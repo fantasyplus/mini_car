@@ -429,7 +429,7 @@
     <wheelSeparation>0.26</wheelSeparation>
     <wheelDiameter>0.12</wheelDiameter>
     <torque>2</torque>
-    <commandTopic>cmd_vel</commandTopic>
+    <commandTopic>new_cmd_vel</commandTopic>
     <odometryTopic>odom</odometryTopic>
     <odometryFrame>odom</odometryFrame>
     <robotBaseFrame>dummy</robotBaseFrame>
