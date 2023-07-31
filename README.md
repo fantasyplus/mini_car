@@ -16,9 +16,11 @@ roslaunch racebot_gazebo rrt_teb.launch
 ```
 ```
 roslaunch racebot_gazebo rrt_dwa.launch
-``````
+```
+```
 roslaunch racebot_gazebo astar_teb.launch
-``````
+```
+```
 roslaunch racebot_gazebo astar_dwa.launch
 ```
 
