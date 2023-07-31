@@ -14,7 +14,7 @@ TebLocalPlannerROS:
   global_plan_overwrite_orientation: True
 
 #指定考虑优化的全局计划子集的最大长度,如果为0或负数：禁用；长度也受本地Costmap大小的限制
-  max_global_plan_lookahead_dist: 2.0 
+  max_global_plan_lookahead_dist: 1.0
 
   feasibility_check_no_poses: 1 #检测位姿可到达的时间间隔，default：4
     
