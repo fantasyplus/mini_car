@@ -21,7 +21,7 @@
         	<arg name="paused" value="$(arg paused)"/>
         	<arg name="use_sim_time" value="$(arg use_sim_time)"/>
         	<arg name="headless" value="$(arg headless)"/>
-	        <arg name="world_name" value="$(find racebot_gazebo)/worlds/test.world"/>
+	        <arg name="world_name" value="$(find racebot_gazebo)/worlds/room_mini.world"/>
   </include>
 
 	<!-- 加载机器人模型描述参数 -->

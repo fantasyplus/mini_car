@@ -11,14 +11,14 @@ roslaunch racebot_gazebo navigation_map.launch
 ```
 
 ### 一键导航
-
-#### Ackermann Wheel
 ```
-roslaunch racebot_gazebo navigation_demo_ackermann.launch
+roslaunch racebot_gazebo rrt_teb.launch
 ```
-#### Mecanum Wheel
 ```
-roslaunch racebot_gazebo navigation_demo_mecanum.launch
+roslaunch racebot_gazebo rrt_dwa.launch
+``````
+roslaunch racebot_gazebo astar_teb.launch
+``````
+roslaunch racebot_gazebo astar_dwa.launch
 ```
-
 

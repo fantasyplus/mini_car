@@ -638,7 +638,7 @@ namespace move_base
 
   void MoveBase::planThread()
   {
-    ROS_INFO("move_base_plan_thread: Starting planner thread...");
+    // ROS_INFO("move_base_plan_thread: Starting planner thread...");
     ros::NodeHandle n;
     ros::Timer timer;
     bool wait_for_wake = false;
@@ -649,7 +649,7 @@ namespace move_base
       while (wait_for_wake || !runPlanner_) // runPlanner_初始化为false，收到一个目标点后变为true
       {
         // if we should not be running the planner then suspend this thread
-        ROS_INFO("move_base_plan_thread: Planner thread is suspending");
+        // ROS_INFO("move_base_plan_thread: Planner thread is suspending");
         //当 std::condition_variable 对象的某个 wait 函数被调用的时候，
         //它使用 std::unique_lock(通过 std::mutex) 来锁住当前线程。
         // wait条件如果不满足，会解锁互斥，然后再让线程进入阻塞或者等待状态
@@ -666,7 +666,7 @@ namespace move_base
         // time to plan! get a copy of the goal and unlock the mutex
         geometry_msgs::PoseStamped temp_goal = planner_goal_;
         lock.unlock();
-        ROS_INFO("move_base_plan_thread: Planning...");
+        // ROS_INFO("move_base_plan_thread: Planning...");
 
         // run planner
         planner_plan_->clear();
@@ -674,7 +674,7 @@ namespace move_base
       }
       else{
         lock.unlock();
-        ROS_INFO("move_base_plan_thread: Waypoints Model Planning...");
+        // ROS_INFO("move_base_plan_thread: Waypoints Model Planning...");
 
         planner_plan_->clear();
 
@@ -685,7 +685,7 @@ namespace move_base
 
       if (gotPlan)
       {
-        ROS_INFO("move_base_plan_thread: Got Plan with %zu points!", planner_plan_->size());
+        // ROS_INFO("move_base_plan_thread: Got Plan with %zu points!", planner_plan_->size());
         // pointer swap the plans under mutex (the controller will pull from latest_plan_)
         std::vector<geometry_msgs::PoseStamped> *temp_plan = planner_plan_;
 
@@ -696,7 +696,7 @@ namespace move_base
         planning_retries_ = 0;
         new_global_plan_ = true;
 
-        ROS_INFO("move_base_plan_thread: Generated a plan from the base_global_planner");
+        // ROS_INFO("move_base_plan_thread: Generated a plan from the base_global_planner");
 
         // make sure we only start the controller if we still haven't reached the goal
         if (runPlanner_)
@@ -708,7 +708,7 @@ namespace move_base
       // if we didn't get a plan and we are in the planning state (the robot isn't moving)
       else if (state_ == PLANNING)
       {
-        ROS_INFO("move_base_plan_thread: No Plan...");
+        // ROS_INFO("move_base_plan_thread: No Plan...");
         ros::Time attempt_end = last_valid_plan_ + ros::Duration(planner_patience_);
 
         // check if we've tried to make a plan for over our time limit or our maximum number of retries
@@ -737,7 +737,7 @@ namespace move_base
       if (planner_frequency_ > 0)
       {
         ros::Duration sleep_time = (start_time + ros::Duration(1.0 / planner_frequency_)) - ros::Time::now();
-        ROS_INFO("move_base_plan_thread: sleep_time:%f", sleep_time.toSec());
+        // ROS_INFO("move_base_plan_thread: sleep_time:%f", sleep_time.toSec());
         if (sleep_time > ros::Duration(0.0))
         {
           wait_for_wake = true;
@@ -957,7 +957,7 @@ namespace move_base
       // make sure to set the new plan flag to false
       new_global_plan_ = false;
 
-      ROS_INFO("move_base_executeCycle: Got a new plan...swap pointers");
+      // ROS_INFO("move_base_executeCycle: Got a new plan...swap pointers");
 
       // do a pointer swap under mutex
       std::vector<geometry_msgs::PoseStamped> *temp_plan = controller_plan_;
@@ -966,7 +966,7 @@ namespace move_base
       controller_plan_ = latest_plan_;
       latest_plan_ = temp_plan;
       lock.unlock();
-      ROS_INFO("move_base_executeCycle: pointers swapped!");
+      // ROS_INFO("move_base_executeCycle: pointers swapped!");
 
       //给局部规划器输入路径，返回布尔值
       if (!tc_->setPlan(*controller_plan_))
@@ -999,7 +999,7 @@ namespace move_base
       runPlanner_ = true;
       planner_cond_.notify_one();
     }
-      ROS_INFO("move_base_executeCycle: Waiting for plan, in the planning state.");
+      // ROS_INFO("move_base_executeCycle: Waiting for plan, in the planning state.");
       break;
 
     // if we're controlling, we'll attempt to find valid velocity commands

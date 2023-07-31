@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true">
+    <rosparam file="$(find racebot_gazebo)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find racebot_gazebo)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find racebot_gazebo)/config/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find racebot_gazebo)/config/global_costmap_params.yaml" command="load" />
+
+    <rosparam file="$(find racebot_gazebo)/config/move_base_params.yaml" command="load" />
+    <rosparam file="$(find racebot_gazebo)/config/base_global_planner_params.yaml" command="load" />
+  </node>
+</launch> 
