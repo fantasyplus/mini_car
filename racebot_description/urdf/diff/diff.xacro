@@ -60,7 +60,7 @@
         <box size="0.2 .3 0.1" />
       </geometry>
     </collision>
-    <xacro:default_inertial mass="8.2" />
+    <xacro:default_inertial mass="25.2" />
   </link>
 
   <link name="wheel_1">
@@ -83,7 +83,7 @@
     <mu2>0.5</mu2>
     <!-- <mu1>0.5</mu1>
 		    <mu2>0.5</mu2> -->
-    <xacro:default_inertial mass="0.5" />
+    <xacro:default_inertial mass="2.5" />
   </link>
 
 
@@ -105,7 +105,7 @@
     <mu2>0.5</mu2>
     <!-- <mu1>0.5</mu1>
 		    <mu2>0.5</mu2> -->
-    <xacro:default_inertial mass="0.5" />
+    <xacro:default_inertial mass="2.5" />
 
   </link>
 
@@ -128,7 +128,7 @@
     <mu2>0.5</mu2>
     <!-- <mu1>0.5</mu1>
 		    <mu2>0.5</mu2> -->
-    <xacro:default_inertial mass="0.5" />
+    <xacro:default_inertial mass="2.5" />
   </link>
 
   <link name="wheel_4">
@@ -149,7 +149,7 @@
     <mu2>0.5</mu2>
     <!-- <mu1>0.5</mu1>
 		    <mu2>0.5</mu2> -->
-    <xacro:default_inertial mass="0.5" />
+    <xacro:default_inertial mass="2.5" />
 
   </link>
 
@@ -423,7 +423,7 @@
       <rightRearJoint>base_to_wheel4</rightRearJoint>
       <wheelSeparation>0.26</wheelSeparation>
       <wheelDiameter>0.12</wheelDiameter>
-      <torque>2</torque>
+      <torque>50</torque>
       <commandTopic>new_cmd_vel</commandTopic>
       <odometryTopic>odom</odometryTopic>
       <odometryFrame>odom</odometryFrame>

@@ -9,7 +9,7 @@ Panels:
         - /DepthCloud1/Auto Size1
         - /PointStamped1
       Splitter Ratio: 0.6526610255241394
-    Tree Height: 372
+    Tree Height: 363
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -441,15 +441,15 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 5.815310955047607
+      Distance: 8.170093536376953
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 2.4313695430755615
-        Y: -5.366294860839844
+        X: 1.163468599319458
+        Y: -2.559473991394043
         Z: 6.326287984848022e-5
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
@@ -480,4 +480,4 @@ Window Geometry:
     collapsed: false
   Width: 884
   X: 1036
-  Y: 73
+  Y: 88

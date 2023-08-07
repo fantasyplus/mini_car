@@ -223,10 +223,10 @@ void PurePursuit(ros::Publisher &lookahead_pub)
 
     float k = 2 * sin(alpha) / lookahead;
     ROS_INFO("k: %f", k);
-    if (fabs(k) > 1)
+    if (fabs(k) > 0.8)
     {
-        // velocity *= 0.5;
-        steering_angle *= 1.5;
+        velocity /= fabs(k);
+        steering_angle *= fabs(k) * 2;
     }
 
     // Publish the message
@@ -274,12 +274,12 @@ int main(int argc, char **argv)
         }
 
         // Send a message to rosout with the details.
-        ROS_INFO_STREAM("index = " << waypoints.size() << " idx = " << idx << " current pose [" << xc << "," << yc
-                                   << "] [vel, yaw] = [" << msg.linear.x << "," << msg.angular.z << "]");
         if (idx < waypoints.size() - 1)
         {
             PurePursuit(lookahead_pub);
             vel_pub.publish(msg);
+            ROS_INFO_STREAM("index = " << waypoints.size() << " idx = " << idx << " current pose [" << xc << "," << yc
+                                       << "] [vel, yaw] = [" << msg.linear.x << "," << msg.angular.z << "]");
 
             // Wait until it's time for another iteration.
             ros::spinOnce();
