@@ -1,25 +1,22 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>diff_navigation</name>
+  <name>pure_pursuit_fp</name>
   <version>0.0.0</version>
-  <description>The diff_navigation package</description>
+  <description>The pure_pursuit package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
-  <!-- Example:  -->
-  <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="jing@todo.todo">jing</maintainer>
+  <author email="jefffer705@hotmail.com">Jeff Paulo Fernandez</author>
+  <maintainer email="jefffer705@hotmail.com">Jeff Paulo Fernandez</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
-  <!-- Commonly used license strings: -->
-  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
-  <license>TODO</license>
+  <license>MIT</license>
 
 
   <!-- Url tags are optional, but multiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/diff_navigation</url> -->
+  <!-- <url type="website">http://wiki.ros.org/purepursuit_simulation</url> -->
 
 
   <!-- Author tags are optional, multiple are allowed, one per tag -->
@@ -51,16 +48,16 @@
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>rospy</build_depend>
+  <build_depend>sensor_msgs</build_depend>
   <build_depend>std_msgs</build_depend>
-  <build_depend>tf</build_depend>
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
+  <build_export_depend>sensor_msgs</build_export_depend>
   <build_export_depend>std_msgs</build_export_depend>
-  <build_export_depend>tf</build_export_depend>
   <exec_depend>roscpp</exec_depend>
   <exec_depend>rospy</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>std_msgs</exec_depend>
-  <exec_depend>tf</exec_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

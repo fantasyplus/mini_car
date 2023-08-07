@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<launch>
+
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="log"
+    clear_params="true">
+    <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
+
+    <rosparam file="$(find racebot_gazebo)/config/teb/costmap_common_params.yaml" command="load"
+      ns="global_costmap" />
+    <rosparam file="$(find racebot_gazebo)/config/teb/costmap_common_params.yaml" command="load"
+      ns="local_costmap" />
+    <rosparam file="$(find racebot_gazebo)/config/teb/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find racebot_gazebo)/config/teb/global_costmap_params.yaml" command="load" />
+
+    <rosparam file="$(find racebot_gazebo)/config/teb/move_base_params.yaml" command="load" />
+    <rosparam file="$(find racebot_gazebo)/config/teb/base_global_planner_params.yaml"
+      command="load" />
+    <rosparam file="$(find racebot_gazebo)/config/teb/teb_local_planner_params_diff.yaml"
+      command="load" />
+  </node>
+
+  <!-- <node pkg="pure_pursuit" type="pure_pursuit_node" name="pure_pursuit_node" output="screen">
+    <rosparam file="$(find pure_pursuit)/config/pure_pursuit_params.yaml" command="load" />
+  </node> -->
+
+  <node pkg="pure_pursuit_fp" type="pure_pursuit_fp" name="pure_pursuit_fp" output="screen">
+    <rosparam file="$(find pure_pursuit_fp)/config/pure_pursuit_params.yaml" command="load" />
+  </node>
+</launch> 

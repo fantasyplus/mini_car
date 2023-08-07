@@ -1,0 +1,7 @@
+controller_freq: 50
+min_ld: 0.5
+car_wheel_base: 0.15
+max_speed: 0.8
+kp: 1.0
+kd: 0.0
+ki: 0.0

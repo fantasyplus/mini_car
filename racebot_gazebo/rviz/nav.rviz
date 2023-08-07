@@ -7,8 +7,9 @@ Panels:
         - /Global Options1
         - /RobotModel1/Links1/base_footprint1
         - /DepthCloud1/Auto Size1
+        - /PointStamped1
       Splitter Ratio: 0.6526610255241394
-    Tree Height: 363
+    Tree Height: 372
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -134,55 +135,51 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
+          Value: true
         base_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        camera:
+        camera_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        imu:
+        dummy:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        imu_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        lidar:
+        laser_frame:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        link_left_back:
+        wheel_1:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        link_left_front:
+        wheel_2:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        link_right_back:
+        wheel_3:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        link_right_front:
+        wheel_4:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        real_sense:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        realsense_depth:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
       Name: RobotModel
       Robot Description: robot_description
       TF Prefix: ""
@@ -203,7 +200,7 @@ Visualization Manager:
       Buffer Length: 1
       Class: rviz/Path
       Color: 255; 0; 0
-      Enabled: true
+      Enabled: false
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
@@ -221,7 +218,7 @@ Visualization Manager:
       Shaft Length: 0.10000000149011612
       Topic: /move_base/TebLocalPlannerROS/local_plan
       Unreliable: false
-      Value: true
+      Value: false
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
@@ -354,6 +351,8 @@ Visualization Manager:
         Marker: true
         Odometry: true
         Odometry EKF: true
+        PointStamped: true
+        Pose: true
         Pose Array: true
         RobotModel: true
         Value: true
@@ -394,6 +393,31 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: false
+    - Alpha: 1
+      Axes Length: 1
+      Axes Radius: 0.10000000149011612
+      Class: rviz/Pose
+      Color: 255; 25; 0
+      Enabled: true
+      Head Length: 0.30000001192092896
+      Head Radius: 0.10000000149011612
+      Name: Pose
+      Shaft Length: 1
+      Shaft Radius: 0.05000000074505806
+      Shape: Arrow
+      Topic: /local_goal
+      Unreliable: false
+      Value: true
+    - Alpha: 1
+      Class: rviz/PointStamped
+      Color: 204; 41; 204
+      Enabled: true
+      History Length: 1
+      Name: PointStamped
+      Radius: 0.05000000074505806
+      Topic: /lookahead_point
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 0; 0; 0
@@ -417,15 +441,15 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 17.433494567871094
+      Distance: 5.815310955047607
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -2.1886825561523438
-        Y: 0.6673651933670044
+        X: 2.4313695430755615
+        Y: -5.366294860839844
         Z: 6.326287984848022e-5
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
@@ -435,7 +459,7 @@ Visualization Manager:
       Pitch: 1.5147963762283325
       Target Frame: <Fixed Frame>
       Value: XYOrbit (rviz)
-      Yaw: 3.153583288192749
+      Yaw: 3.138583183288574
     Saved: ~
 Window Geometry:
   Camera:
@@ -445,7 +469,7 @@ Window Geometry:
   Height: 601
   Hide Left Dock: true
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd000000040000000000000156000002e5fc0200000006fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000198000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073000000003d000002e5000000c900fffffffb0000000c00430061006d00650072006100000001b30000016f0000001600ffffff000000010000010f000002e5fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003d000002e5000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004a00000003efc0100000002fb0000000800540069006d00650000000000000004a0000004f300fffffffb0000000800540069006d0065010000000000000450000000000000000000000374000001ff00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd000000040000000000000156000001fffc0200000006fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000198000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073000000003d000001ff000000c900fffffffb0000000c00430061006d00650072006100000001b30000016f0000001600ffffff000000010000010f000002e5fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003d000002e5000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004a00000003efc0100000002fb0000000800540069006d00650000000000000004a0000004f300fffffffb0000000800540069006d0065010000000000000450000000000000000000000374000001ff00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -455,5 +479,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 884
-  X: 1027
-  Y: 280
+  X: 1036
+  Y: 73

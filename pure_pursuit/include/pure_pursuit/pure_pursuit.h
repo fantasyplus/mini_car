@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "ros/ros.h"
-#include "ackermann_msgs/AckermannDriveStamped.h"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TransformStamped.h>
@@ -26,6 +25,7 @@ private:
     double alpha_;
     double car_speed_;
     int controller_freq_;
+    double max_speed_;
     int point_idx_;
     int last_p_idx_;
     double last_dist_ = std::numeric_limits<double>::infinity();
@@ -37,7 +37,6 @@ private:
     ros::Time last_msg_time_;
     std::vector<geometry_msgs::PoseStamped> path_;
     geometry_msgs::PoseStamped target_point_;
-    ackermann_msgs::AckermannDriveStamped control_msg_;
     geometry_msgs::PointStamped lookahead_p;
     geometry_msgs::TwistStamped cmd_vel_msg_;
 
@@ -45,7 +44,6 @@ private:
     ros::Publisher cmd_vel_pub_;
     ros::Publisher l_point_pub_;
     ros::Publisher current_speed_pub_;
-    ros::Subscriber ackermann_sub_;
     geometry_msgs::TransformStamped base_location_;
     tf2_ros::Buffer tfBuffer_;
     tf2_ros::TransformListener *tfListener_;

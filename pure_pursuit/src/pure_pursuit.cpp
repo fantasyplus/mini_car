@@ -8,30 +8,24 @@ PurePursuit::PurePursuit()
     // Node paramters
     nh_private.param<double>("ld_gain", ld_gain_, 1.0);
     nh_private.param<double>("min_ld", min_ld_, 0.5);
-    nh_private.param<double>("car_wheel_base", car_wheel_base_, 0.44);
+    nh_private.param<double>("car_wheel_base", car_wheel_base_, 0.2);
     nh_private.param<int>("controller_freq", controller_freq_, 10);
+    nh_private.param<double>("max_speed", max_speed_, 0.8);
     nh_private.param<std::string>("map_frame", map_frame_, "map");
     nh_private.param<std::string>("base_frame", base_frame_, "base_link");
     ld_ = min_ld_;
     // Publishers and subscribers
 
     cmd_vel_pub_ = nh_.advertise<geometry_msgs::Twist>("/new_cmd_vel", 1);
-    control_pub_ = nh_.advertise<ackermann_msgs::AckermannDriveStamped>("/pure_pursuit/control", 1);
     l_point_pub_ = nh_.advertise<geometry_msgs::PointStamped>("/pure_pursuit/lookahead_point", 1);
 
-    ros::Subscriber cmd_vel_sub_ = nh_.subscribe("/cmd_vel", 1, &PurePursuit::cmdVelCallback, this);
     ros::Subscriber odom_sub_ = nh_.subscribe("/odom", 1, &PurePursuit::odomCallback, this);
-    ros::Subscriber path_sub_ = nh_.subscribe("/pure_pursuit/path", 1, &PurePursuit::globalPathCallback, this);
+    ros::Subscriber path_sub_ = nh_.subscribe("/move_base/NavfnROS/plan", 1, &PurePursuit::globalPathCallback, this);
 
     ros_rate_ = new ros::Rate(controller_freq_);
     tfListener_ = new tf2_ros::TransformListener(tfBuffer_);
     // main loop
     control_loop_();
-}
-
-void PurePursuit::cmdVelCallback(const geometry_msgs::TwistStamped::ConstPtr &msg)
-{
-    cmd_vel_msg_ = *msg;
 }
 
 void PurePursuit::odomCallback(const nav_msgs::Odometry::ConstPtr &msg)
@@ -92,10 +86,10 @@ void PurePursuit::control_loop_()
                 ld_2 = ld_ * ld_;
                 y_t = target_point_.pose.position.y;
                 delta = atan2(2 * car_wheel_base_ * y_t, ld_2);
-                control_msg_.drive.steering_angle = delta;
-                control_msg_.drive.speed = 2;
-                control_msg_.header.stamp = ros::Time::now();
-                control_pub_.publish(control_msg_);
+                geometry_msgs::Twist cmd_vel_msg;
+                cmd_vel_msg.linear.x = max_speed_;
+                cmd_vel_msg.angular.z = delta * 1.4;
+                cmd_vel_pub_.publish(cmd_vel_msg);
 
                 last_p_idx_ = point_idx_;
                 last_dist_ = distance_;
@@ -106,10 +100,10 @@ void PurePursuit::control_loop_()
                 else if (point_idx_ == path_.size())
                 {
                     ROS_INFO("Reached final point");
-                    control_msg_.drive.steering_angle = 0;
-                    control_msg_.drive.speed = 0;
-                    control_msg_.header.stamp = ros::Time::now();
-                    control_pub_.publish(control_msg_);
+                    geometry_msgs::Twist cmd_vel_msg;
+                    cmd_vel_msg.linear.x = 0.0;
+                    cmd_vel_msg.angular.z = 0.0;
+                    cmd_vel_pub_.publish(cmd_vel_msg);
                     got_path_ = false;
                     point_idx_ = 0;
                 }
