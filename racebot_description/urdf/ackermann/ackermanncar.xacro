@@ -14,8 +14,8 @@
             </geometry>
             <!-- <origin xyz="0 0 -0.023" rpy="0 0 0" /> -->
             <origin xyz="0 0 0" rpy="0 0 0" />
-            <material name="yellow">
-                <color rgba="0.8 0.3 0.1 0.5" />
+            <material name="white">
+                <color rgba="1 1 1 1" />
             </material>
         </visual>
         <collision>
