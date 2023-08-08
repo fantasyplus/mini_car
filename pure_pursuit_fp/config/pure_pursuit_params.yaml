@@ -1,7 +1,7 @@
-controller_freq: 50
+controller_rate: 50
 min_ld: 0.8
 car_wheel_base: 0.2
 max_speed: 0.8
-kp: 1.02
-kd: 0.0001
-ki: 0.0
+kp: 1.0
+ki: 0.02
+kd: 0.005

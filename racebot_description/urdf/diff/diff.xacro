@@ -423,7 +423,7 @@
       <rightRearJoint>base_to_wheel4</rightRearJoint>
       <wheelSeparation>0.26</wheelSeparation>
       <wheelDiameter>0.12</wheelDiameter>
-      <torque>50</torque>
+      <torque>40</torque>
       <commandTopic>new_cmd_vel</commandTopic>
       <odometryTopic>odom</odometryTopic>
       <odometryFrame>odom</odometryFrame>

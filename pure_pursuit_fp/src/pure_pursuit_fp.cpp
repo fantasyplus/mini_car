@@ -1,9 +1,4 @@
 #include <fcntl.h>
-#include <ros/ros.h>
-#include <nav_msgs/Odometry.h>
-#include <nav_msgs/Path.h>
-#include <geometry_msgs/Twist.h>
-#include <tf/transform_datatypes.h>
 #include <cmath>
 #include <iostream>
 #include <fstream>
@@ -11,9 +6,19 @@
 #include <thread>
 #include <vector>
 #include <sstream>
+#include <csignal>
+#include <cstdlib>
+#include <math.h> /* atan, sin */
+
+#include <ros/ros.h>
+#include <nav_msgs/Odometry.h>
+#include <nav_msgs/Path.h>
+#include <geometry_msgs/Twist.h>
+#include <tf/transform_datatypes.h>
 #include "geometry_msgs/PointStamped.h"
 #include "ros/publisher.h"
-#include <math.h> /* atan, sin */
+#include <dynamic_reconfigure/server.h>
+#include "pure_pursuit_fp/PIDConfig.h"
 
 #define _USE_MATH_DEFINES
 
@@ -31,8 +36,8 @@ float max_speed = 0.;
 vector<vector<float>> waypoints;
 
 float kp = 0.1;
-float kd = 0.;
 float ki = 0.;
+float kd = 0.;
 
 bool get_path = false;
 
@@ -46,6 +51,20 @@ bool pure_pursuit_flag = true;
 // Initialize Twist message
 geometry_msgs::Twist msg;
 
+ros::Publisher vel_pub;
+
+// SIGINT信号处理函数
+void signalHandler(int signum)
+{
+    std::cout << "Ctrl+C received. Exiting..." << std::endl;
+    // Publish the message
+    msg.linear.x = 0.;
+    msg.angular.z = 0.;
+    vel_pub.publish(msg);
+    // 在这里执行清理操作
+    exit(signum);
+}
+
 // ----- ODOMETRY ------ //
 float norm(vector<float> vect)
 {
@@ -55,6 +74,19 @@ float norm(vector<float> vect)
         sum += pow(vect[i], 2.);
     }
     return sqrt(sum);
+}
+
+void callback(pure_pursuit_fp::PIDConfig &config, uint32_t level)
+{
+    control_rate = config.control_rate;
+    look_head_dis = config.min_ld;
+    wheel_base = config.car_wheel_base;
+    max_speed = config.max_speed;
+    kp = config.kp;
+    ki = config.ki;
+    kd = config.kd;
+
+    ROS_INFO("Reconfigure Request: kp = %f, ki = %f, kd = %f", kp, ki, kd);
 }
 
 /**
@@ -197,7 +229,7 @@ void PurePursuit(ros::Publisher &lookahead_pub)
     float v_error = v_desired - vel;
 
     float P_vel = kp * v_error;
-    float I_vel = v_error * dt;
+    float I_vel = ki * v_error * dt;
     float D_vel = kd * (v_error - v_prev_error) / dt;
 
     float velocity = P_vel + I_vel + D_vel;
@@ -222,7 +254,7 @@ void PurePursuit(ros::Publisher &lookahead_pub)
     float steering_angle = atan((2. * wheel_base * sin(alpha)) / lookahead);
 
     float k = 2 * sin(alpha) / lookahead;
-    ROS_INFO("k: %f", k);
+    // ROS_INFO("k: %f", k);
     if (fabs(k) > 0.8)
     {
         velocity /= fabs(k);
@@ -242,21 +274,20 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     ros::NodeHandle nh_private("~");
 
-    nh_private.param<int>("controller_freq", control_rate, 10);
-    nh_private.param<float>("min_ld", look_head_dis, 0.5);
-    nh_private.param<float>("car_wheel_base", wheel_base, 0.2);
-    nh_private.param<float>("max_speed", max_speed, 0.8);
-    nh_private.param<float>("kp", kp, 1.2);
-    nh_private.param<float>("kd", kd, 0.0);
-    nh_private.param<float>("ki", ki, 0.0);
+    dynamic_reconfigure::Server<pure_pursuit_fp::PIDConfig> server;
+    dynamic_reconfigure::Server<pure_pursuit_fp::PIDConfig>::CallbackType f;
+    f = boost::bind(&callback, _1, _2);
+    server.setCallback(f);
 
     // Initialize Subscriber
     ros::Subscriber controller_sub = nh.subscribe("odom", 1, poseCallback);
     ros::Subscriber path_sub = nh.subscribe("move_base/NavfnROS/plan", 1, globalPathCallback);
 
     // Initizlize Publisher
-    ros::Publisher vel_pub = nh.advertise<geometry_msgs::Twist>("new_cmd_vel", 1);
+    vel_pub = nh.advertise<geometry_msgs::Twist>("new_cmd_vel", 1);
     ros::Publisher lookahead_pub = nh.advertise<geometry_msgs::PointStamped>("lookahead_point", 1);
+
+    signal(SIGINT, signalHandler);
 
     // Initialize rate
     ros::Rate rate(control_rate);
@@ -278,8 +309,7 @@ int main(int argc, char **argv)
         {
             PurePursuit(lookahead_pub);
             vel_pub.publish(msg);
-            ROS_INFO_STREAM("index = " << waypoints.size() << " idx = " << idx << " current pose [" << xc << "," << yc
-                                       << "] [vel, yaw] = [" << msg.linear.x << "," << msg.angular.z << "]");
+            ROS_INFO_STREAM("[vel, yaw] = [" << msg.linear.x << "," << msg.angular.z << "]");
 
             // Wait until it's time for another iteration.
             ros::spinOnce();

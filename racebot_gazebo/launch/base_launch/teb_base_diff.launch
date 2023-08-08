@@ -26,4 +26,6 @@
   <node pkg="pure_pursuit_fp" type="pure_pursuit_fp" name="pure_pursuit_fp" output="screen">
     <rosparam file="$(find pure_pursuit_fp)/config/pure_pursuit_params.yaml" command="load" />
   </node>
+
+  <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="rqt_reconfigure" output="screen"/>
 </launch> 

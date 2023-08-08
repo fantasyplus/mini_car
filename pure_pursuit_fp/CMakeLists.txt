@@ -8,7 +8,10 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   std_msgs
+  dynamic_reconfigure
 )
+
+generate_dynamic_reconfigure_options(config/config.cfg) 
 
 catkin_package(
   # INCLUDE_DIRS include
