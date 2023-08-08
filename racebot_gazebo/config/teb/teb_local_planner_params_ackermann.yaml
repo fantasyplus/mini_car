@@ -20,7 +20,7 @@ TebLocalPlannerROS:
     
   #如果为true，则在目标落后于起点的情况下，可以使用向后运动来初始化基础轨迹
   #(仅在机器人配备了后部传感器的情况下才建议这样做）
-  allow_init_with_backwards_motion: False
+  allow_init_with_backwards_motion: True
 
   global_plan_viapoint_sep: -1
 
@@ -33,19 +33,19 @@ TebLocalPlannerROS:
   publish_feedback: False
 
   # Robot
-  max_vel_x: 3
-  max_vel_x_backwards: 1.5
-  max_vel_theta: 3.5
-  acc_lim_x: 2.5
-  acc_lim_theta: 3.5
+  max_vel_x: 0.5
+  max_vel_x_backwards: 0.2
+  max_vel_theta: 0.6
+  acc_lim_x: 0.1
+  acc_lim_theta: 0.2
 
   #仅适用于全向轮
   # max_vel_y (double, default: 0.0)  
   # acc_lim_y (double, default: 0.5)
 
   # ********************** Carlike robot parameters ********************
-  min_turning_radius: 0.45     # 最小转弯半径 注意车辆运动学中心是后轮中点
-  wheelbase: 0.26                 # 即前后轮距离
+  min_turning_radius: 1.1     # 最小转弯半径 注意车辆运动学中心是后轮中点
+  wheelbase: 0.8                # 即前后轮距离
 
 #设置为true时，ROS话题（rostopic） cmd_vel/angular/z 内的数据是舵机角度，
   cmd_angle_instead_rotvel: True 
@@ -56,16 +56,16 @@ TebLocalPlannerROS:
     type: "polygon"
     vertices: [[0.15, 0.15], [0.15, -0.15], [-0.15, -0.15], [-0.15, 0.15]]    
 
-  xy_goal_tolerance: 0.1
-  yaw_goal_tolerance: 1.0
+  xy_goal_tolerance: 0.2
+  yaw_goal_tolerance: 0.5
   #自由目标速度。设为False时，车辆到达终点时的目标速度为0。
   #TEB是时间最优规划器。缺少目标速度约束将导致车辆“全速冲线”
-  free_goal_vel: True
+  free_goal_vel: False
   
   # complete_global_plan: True   
   # Obstacles
       
-  min_obstacle_dist: 0.15 # 与障碍的最小期望距离,
+  min_obstacle_dist: 0.3 # 与障碍的最小期望距离,
   include_costmap_obstacles: True #应否考虑到局部costmap的障碍设置为True后才能规避实时探测到的、建图时不存在的障碍物。
   costmap_obstacles_behind_robot_dist: 2.0 #考虑后面n米内的障碍物2.0
   obstacle_poses_affected: 30 #为了保持距离，每个障碍物位置都与轨道上最近的位置相连。
@@ -84,10 +84,10 @@ TebLocalPlannerROS:
   weight_acc_lim_x: 1
   weight_acc_lim_theta: 2 #1
   weight_kinematics_nh: 1000
-  weight_kinematics_forward_drive: 0.1 #1
-  weight_kinematics_turning_radius: 1 #1
-  weight_optimaltime: 10
-  weight_obstacle: 10 #50
+  weight_kinematics_forward_drive: 100 #1
+  weight_kinematics_turning_radius: 1000 #1
+  weight_optimaltime: 1
+  weight_obstacle: 50 #50
   weight_dynamic_obstacle: 10 # not in use yet
   alternative_time_cost: False # not in use yet
   selection_alternative_time_cost: False
