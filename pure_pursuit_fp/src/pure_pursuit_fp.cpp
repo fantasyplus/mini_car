@@ -1,3 +1,4 @@
+// C++
 #include <fcntl.h>
 #include <cmath>
 #include <iostream>
@@ -10,6 +11,7 @@
 #include <cstdlib>
 #include <math.h> /* atan, sin */
 
+// ros 相关
 #include <ros/ros.h>
 #include <nav_msgs/Odometry.h>
 #include <nav_msgs/Path.h>
@@ -17,6 +19,8 @@
 #include <tf/transform_datatypes.h>
 #include "geometry_msgs/PointStamped.h"
 #include "ros/publisher.h"
+
+// dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
 #include "pure_pursuit_fp/PIDConfig.h"
 
@@ -24,8 +28,9 @@
 
 using namespace std;
 
-// GLOBAL VARIABLES
+// 全局变量
 int control_rate = 10;
+int nearest_idx = 0;
 int idx = 0;
 float xc = 0.;
 float yc = 0.;
@@ -41,23 +46,23 @@ float kd = 0.;
 
 bool get_path = false;
 
-// CAR VARIABLES
+// 小车变量
 float look_head_dis = 0.1;
-float wheel_base = 0.04;  // wheelbase
+float wheel_base = 0.04;  // 轴距
 
-// PORGRAM VARIABLES
+// 程序变量
 bool pure_pursuit_flag = true;
 
-// Initialize Twist message
+// 初始化 Twist 消息
 geometry_msgs::Twist msg;
 
 ros::Publisher vel_pub;
 
-// SIGINT信号处理函数
+// SIGINT 信号处理函数
 void signalHandler(int signum)
 {
-    std::cout << "Ctrl+C received. Exiting..." << std::endl;
-    // Publish the message
+    std::cout << "收到 Ctrl+C 信号。退出..." << std::endl;
+    // 发布消息
     msg.linear.x = 0.;
     msg.angular.z = 0.;
     vel_pub.publish(msg);
@@ -65,7 +70,7 @@ void signalHandler(int signum)
     exit(signum);
 }
 
-// ----- ODOMETRY ------ //
+// ----- 里程计 ------ //
 float norm(vector<float> vect)
 {
     float sum = 0.;
@@ -76,7 +81,7 @@ float norm(vector<float> vect)
     return sqrt(sum);
 }
 
-void callback(pure_pursuit_fp::PIDConfig &config, uint32_t level)
+void reconfigureCallback(pure_pursuit_fp::PIDConfig &config, uint32_t level)
 {
     control_rate = config.control_rate;
     look_head_dis = config.min_ld;
@@ -86,27 +91,23 @@ void callback(pure_pursuit_fp::PIDConfig &config, uint32_t level)
     ki = config.ki;
     kd = config.kd;
 
-    ROS_INFO("Reconfigure Request: kp = %f, ki = %f, kd = %f", kp, ki, kd);
+    ROS_INFO("reconfigure:kp = %f, ki = %f, kd = %f", kp, ki, kd);
 }
 
-/**
- * Callback function executes when new topic data comes.
- * Collects latest data for postion, orientation and velocity
- */
 void poseCallback(const nav_msgs::Odometry::ConstPtr &msg)
 {
-    // Position
+    // 位置
     xc = msg->pose.pose.position.x;
     yc = msg->pose.pose.position.y;
     float zc = msg->pose.pose.position.z;
 
-    // Orientation
+    // 方向
     float qx = msg->pose.pose.orientation.x;
     float qy = msg->pose.pose.orientation.y;
     float qz = msg->pose.pose.orientation.z;
     float qw = msg->pose.pose.orientation.w;
 
-    // Linear velocity
+    // 线速度
     float linear_vx = msg->twist.twist.linear.x;
     float linear_vy = msg->twist.twist.linear.y;
     float linear_vz = msg->twist.twist.linear.z;
@@ -114,33 +115,23 @@ void poseCallback(const nav_msgs::Odometry::ConstPtr &msg)
     vector<float> vect_vel = {linear_vx, linear_vy, linear_vz};
     float linear_vel = norm(vect_vel);
 
-    // Angular velocity
+    // 角速度
     float angular_vel = msg->twist.twist.angular.z;
 
-    // Euler from Quaternion
+    // 从四元数计算欧拉角
     tf::Quaternion quat(qx, qy, qz, qw);
     tf::Matrix3x3 mat(quat);
 
     double curr_roll, curr_pitch, curr_yaw;
     mat.getEulerYPR(curr_yaw, curr_pitch, curr_roll);
 
-    // Assign to global variables
+    // 赋值给全局变量
     vel = linear_vel;
     yaw = curr_yaw;
-
-    // TESTING: Print values
-    // ROS_INFO("GLOBAL Position [%f, %f, %f], vel [%f], yaw [%f]", xc, yc, zc, vel, yaw);
-    // ROS_INFO("Roll, Pitch, Yaw = [%f, %f, %f]", roll, pitch, yaw);
-    // ROS_INFO("Seq -> [%d], Vel (linear x, norm, angular) -> [%f, %f, %f]", msg->header.seq, linear_vx, linear_vel,
-    // angular_vel); ROS_INFO("Vel (linear x, norm) -> [%f, %f]", linear_vx, linear_vel); ROS_INFO("Position (xc, yc,
-    // zc) -> [%f, %f, %f]", xc, yc, zc); ROS_INFO("Orientation (qx, qy, qz, qw) -> [%f, %f, %f, %f]", qx, qy, qz, qw);
-    // ROS_INFO("\n");
 }
 
 void globalPathCallback(const nav_msgs::Path::ConstPtr &msg)
 {
-    ROS_INFO("get path");
-
     waypoints.clear();
     for (int i = 0; i < msg->poses.size(); i++)
     {
@@ -152,10 +143,9 @@ void globalPathCallback(const nav_msgs::Path::ConstPtr &msg)
     get_path = true;
 }
 
-// ----- ARRAY MANIOULATION ------ //
 float find_distance(float x1, float y1)
 {
-    float P = 2.0;  // power of 2
+    float P = 2.0;
     float distance = sqrt(pow(x1 - xc, P) + pow(y1 - yc, P));
     return distance;
 }
@@ -207,13 +197,13 @@ int idx_close_to_lookahead(int idx)
 
 void PurePursuit(ros::Publisher &lookahead_pub)
 {
-    // Get the closest waypoint
-    int nearest_idx = find_nearest_waypoint();
+    // 获取最近的路径点
+    nearest_idx = find_nearest_waypoint();
     idx = idx_close_to_lookahead(nearest_idx);
     float target_x = waypoints[idx][0];
     float target_y = waypoints[idx][1];
 
-    // visual lookhead point
+    // 视觉前视点
     geometry_msgs::PointStamped lookhead_point;
     lookhead_point.header.frame_id = "map";
     lookhead_point.header.stamp = ros::Time::now();
@@ -222,8 +212,7 @@ void PurePursuit(ros::Publisher &lookahead_pub)
 
     lookahead_pub.publish(lookhead_point);
 
-    // Velocity PID controller
-
+    // 速度 PID 控制器
     float dt = 1. / control_rate;
     float v_desired = max_speed;
     float v_error = v_desired - vel;
@@ -235,7 +224,7 @@ void PurePursuit(ros::Publisher &lookahead_pub)
     float velocity = P_vel + I_vel + D_vel;
     v_prev_error = v_error;
 
-    // Pure Pursuit controller
+    // 纯追踪控制器
     float x_delta = target_x - xc;
     float y_delta = target_y - yc;
     float alpha = atan(y_delta / x_delta) - yaw;
@@ -249,7 +238,7 @@ void PurePursuit(ros::Publisher &lookahead_pub)
         alpha += M_PI;
     }
 
-    // Set lookahead distance depending on the speed
+    // 根据速度设置前视距离
     float lookahead = find_distance(target_x, target_y);
     float steering_angle = atan((2. * wheel_base * sin(alpha)) / lookahead);
 
@@ -261,63 +250,59 @@ void PurePursuit(ros::Publisher &lookahead_pub)
         steering_angle *= fabs(k) * 2;
     }
 
-    // Publish the message
+    // 发布消息
     msg.linear.x = velocity;
     msg.angular.z = steering_angle;
 }
 
-// ------ MAIN FUNCTION ------ //
 int main(int argc, char **argv)
 {
-    // Initialize node
+    // 初始化节点
     ros::init(argc, argv, "pure_pursuit");
     ros::NodeHandle nh;
     ros::NodeHandle nh_private("~");
 
+    // 读取参数
     dynamic_reconfigure::Server<pure_pursuit_fp::PIDConfig> server;
     dynamic_reconfigure::Server<pure_pursuit_fp::PIDConfig>::CallbackType f;
-    f = boost::bind(&callback, _1, _2);
+    f = boost::bind(&reconfigureCallback, _1, _2);
     server.setCallback(f);
 
-    // Initialize Subscriber
+    // 订阅者
     ros::Subscriber controller_sub = nh.subscribe("odom", 1, poseCallback);
     ros::Subscriber path_sub = nh.subscribe("move_base/NavfnROS/plan", 1, globalPathCallback);
 
-    // Initizlize Publisher
+    // 发布者
     vel_pub = nh.advertise<geometry_msgs::Twist>("new_cmd_vel", 1);
     ros::Publisher lookahead_pub = nh.advertise<geometry_msgs::PointStamped>("lookahead_point", 1);
 
     signal(SIGINT, signalHandler);
 
-    // Initialize rate
     ros::Rate rate(control_rate);
     ros::spinOnce();
 
-    // MOVE ROBOT
     while (ros::ok())
     {
         if (!get_path)
         {
-            ROS_INFO("...waiting for path...");
+            ROS_INFO("...wait for path...");
             this_thread::sleep_for(chrono::milliseconds(1000));
             ros::spinOnce();
             continue;
         }
 
-        // Send a message to rosout with the details.
-        if (idx < waypoints.size() - 1)
+        if (nearest_idx < waypoints.size() - 1)
         {
             PurePursuit(lookahead_pub);
             vel_pub.publish(msg);
-            ROS_INFO_STREAM("[vel, yaw] = [" << msg.linear.x << "," << msg.angular.z << "]");
+            ROS_INFO_STREAM("[velo,yaw] = [" << msg.linear.x << "," << msg.angular.z << "]");
 
-            // Wait until it's time for another iteration.
+            // 等待直到下一次迭代。
             ros::spinOnce();
             rate.sleep();
         }
         else
         {
-            // Publish the message
             msg.linear.x = 0.;
             msg.angular.z = 0.;
             vel_pub.publish(msg);
@@ -327,6 +312,5 @@ int main(int argc, char **argv)
         }
     }
 
-    ROS_INFO_STREAM("DESTENATION REACHED!!!");
     return 0;
 }

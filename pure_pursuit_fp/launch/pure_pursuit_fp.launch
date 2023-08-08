@@ -1,5 +1,4 @@
 <launch>
     <node pkg="pure_pursuit_fp" type="pure_pursuit_fp" name="pure_pursuit_fp" output="screen">
-        <rosparam file="$(find pure_pursuit_fp)/config/pure_pursuit_params.yaml" command="load" />
     </node>
 </launch>

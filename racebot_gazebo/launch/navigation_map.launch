@@ -1,7 +1,0 @@
-<launch>
-    <!-- 启动仿真环境 -->
-    <include file="$(find racebot_gazebo)/launch/base_launch/mecanumbot.launch"/>
-
-    <include file="$(find racebot_gazebo)/launch/base_launch/slam_navi.launch"/>
-
-</launch>
