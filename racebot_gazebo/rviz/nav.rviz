@@ -5,9 +5,11 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
+        - /TF1
+        - /TF1/Frames1
         - /DepthCloud1/Auto Size1
       Splitter Ratio: 0.6526610255241394
-    Tree Height: 363
+    Tree Height: 372
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -32,6 +34,83 @@ Toolbars:
 Visualization Manager:
   Class: ""
   Displays:
+    - Class: rviz/TF
+      Enabled: true
+      Filter (blacklist): ""
+      Filter (whitelist): ""
+      Frame Timeout: 15
+      Frames:
+        All Enabled: false
+        base_footprint:
+          Value: false
+        base_inertia:
+          Value: false
+        base_link:
+          Value: true
+        camera:
+          Value: false
+        grey_box:
+          Value: false
+        imu:
+          Value: false
+        left_front_wheel:
+          Value: false
+        left_rear_wheel:
+          Value: false
+        left_steering_hinge:
+          Value: false
+        lidar:
+          Value: false
+        map:
+          Value: true
+        odom:
+          Value: false
+        real_sense:
+          Value: false
+        realsense_depth:
+          Value: false
+        right_front_wheel:
+          Value: false
+        right_rear_wheel:
+          Value: false
+        right_steering_hinge:
+          Value: false
+      Marker Alpha: 1
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        map:
+          odom:
+            base_footprint:
+              base_link:
+                base_inertia:
+                  {}
+                camera:
+                  {}
+                grey_box:
+                  {}
+                imu:
+                  {}
+                left_rear_wheel:
+                  {}
+                left_steering_hinge:
+                  left_front_wheel:
+                    {}
+                lidar:
+                  {}
+                real_sense:
+                  realsense_depth:
+                    {}
+                right_rear_wheel:
+                  {}
+                right_steering_hinge:
+                  right_front_wheel:
+                    {}
+      Update Interval: 0
+      Value: true
     - Alpha: 0.5
       Cell Size: 0.5
       Class: rviz/Grid
@@ -134,6 +213,10 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
+        base_inertia:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
         base_link:
           Alpha: 1
           Show Axes: false
@@ -154,27 +237,22 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        left_front_wheel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_rear_wheel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_steering_hinge:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         lidar:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        link_left_back:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        link_left_front:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        link_right_back:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        link_right_front:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -188,6 +266,21 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
+        right_front_wheel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_rear_wheel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_steering_hinge:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
       Name: RobotModel
       Robot Description: robot_description
       TF Prefix: ""
@@ -365,6 +458,7 @@ Visualization Manager:
         Odometry EKF: true
         Pose Array: true
         RobotModel: true
+        TF: true
         Value: true
         footprint: true
       Zoom Factor: 1
@@ -436,7 +530,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 17.849672317504883
+      Distance: 17.04339027404785
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -444,8 +538,8 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 1.1258165836334229
-        Y: 3.193204641342163
+        X: -8.579699516296387
+        Y: 3.34104585647583
         Z: 6.326287984848022e-05
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
@@ -454,7 +548,7 @@ Visualization Manager:
       Near Clip Distance: 0.009999999776482582
       Pitch: 1.5697963237762451
       Target Frame: <Fixed Frame>
-      Yaw: 1.5554009675979614
+      Yaw: 1.5604009628295898
     Saved: ~
 Window Geometry:
   Camera:
@@ -475,4 +569,4 @@ Window Geometry:
     collapsed: false
   Width: 884
   X: 1004
-  Y: 146
+  Y: 72

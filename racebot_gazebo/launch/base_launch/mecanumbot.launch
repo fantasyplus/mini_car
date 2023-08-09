@@ -7,12 +7,12 @@
     <arg name="headless" default="false"/>
     <arg name="debug" default="false"/>
     <!--模型车的起点放置位置-->
-    <arg name="x_pos" default="0"/>
+    <arg name="x_pos" default="8"/>
     <arg name="y_pos" default="0"/>
     <arg name="z_pos" default="0"/>
     <arg name="R_pos" default="0"/>
     <arg name="P_pos" default="0"/>
-    <arg name="Y_pos" default="0"/>
+    <arg name="Y_pos" default="-3.1415926"/>
 
 	<!--运行gazebo仿真环境-->
 	<include file="$(find gazebo_ros)/launch/empty_world.launch">

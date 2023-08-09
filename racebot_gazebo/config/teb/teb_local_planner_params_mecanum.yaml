@@ -33,22 +33,15 @@ TebLocalPlannerROS:
   publish_feedback: False
 
   # Robot
-  max_vel_x: 0.5
-  max_vel_x_backwards: 0.2
+  max_vel_x: 2.5
+  max_vel_x_backwards: 1.2
   max_vel_theta: 0.9
   acc_lim_x: 0.2
   acc_lim_theta: 0.9
 
   #仅适用于全向轮
-  # max_vel_y: 0.5
-  # acc_lim_y: 0.1
-  # ********************** Carlike robot parameters ********************
-  min_turning_radius: 1.1     # 最小转弯半径 注意车辆运动学中心是后轮中点
-  wheelbase: 0.8                # 即前后轮距离
-
-  #设置为true时，ROS话题（rostopic） cmd_vel/angular/z 内的数据是舵机角度，
-  cmd_angle_instead_rotvel: True 
-  # ********************************************************************
+  max_vel_y: 0.5
+  acc_lim_y: 0.1
 
   # GoalTolerance
   footprint_model:
