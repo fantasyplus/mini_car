@@ -4,7 +4,8 @@
     <env name="ROSCONSOLE_FORMAT" value="[${node}]: ${message}" />
     
     <!-- 启动仿真环境 -->
-    <include file="$(find racebot_gazebo)/launch/base_launch/mecanumbot.launch"/>
+    <!-- <include file="$(find racebot_gazebo)/launch/base_launch/mecanumbot.launch"/> -->
+    <include file="$(find diff_wheeled_robot_gazebo)/launch//diff_wheeled_gazebo.launch"/>
 
     <!-- 设置地图的配置文件 -->
     <arg name="map" default="room_mini.yaml" />
