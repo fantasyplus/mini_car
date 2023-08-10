@@ -20,4 +20,8 @@
 
     <!-- 运行rviz -->
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find racebot_gazebo)/rviz/nav.rviz"/>
+
+    <!-- ekf -->
+    <include file="$(find racebot_gazebo)/launch/base_launch/ekf.launch" />
+
 </launch>

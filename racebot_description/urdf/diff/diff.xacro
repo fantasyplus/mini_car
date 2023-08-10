@@ -276,12 +276,12 @@
       </geometry>
     </collision>
 
-    <visual>
+    <!-- <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
         <mesh filename="package://racebot_description/temp_meshes/hokuyo.dae" />
       </geometry>
-    </visual>
+    </visual> -->
 
     <inertial>
       <mass value="1e-2" />

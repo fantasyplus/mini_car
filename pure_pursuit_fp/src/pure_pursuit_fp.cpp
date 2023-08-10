@@ -1,10 +1,11 @@
-// C++
 #include <fcntl.h>
 #include <cmath>
 #include <iostream>
 #include <fstream>
+#include <limits>
 #include <string>
 #include <thread>
+#include <functional>
 #include <vector>
 #include <sstream>
 #include <csignal>
@@ -17,11 +18,15 @@
 #include <nav_msgs/Path.h>
 #include <geometry_msgs/Twist.h>
 #include <tf/transform_datatypes.h>
-#include "geometry_msgs/PointStamped.h"
-#include "ros/publisher.h"
+#include <geometry_msgs/PointStamped.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <ros/publisher.h>
+#include <tf2_ros/transform_listener.h>
+#include <geometry_msgs/TransformStamped.h>
 
 // dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
+#include "geometry_msgs/Transform.h"
 #include "pure_pursuit_fp/PIDConfig.h"
 
 #define _USE_MATH_DEFINES
@@ -94,29 +99,29 @@ void reconfigureCallback(pure_pursuit_fp::PIDConfig &config, uint32_t level)
     ROS_INFO("reconfigure:kp = %f, ki = %f, kd = %f", kp, ki, kd);
 }
 
-void poseCallback(const nav_msgs::Odometry::ConstPtr &msg)
+void getCurPos(tf2_ros::Buffer &tfBuffer)
 {
-    // 位置
-    xc = msg->pose.pose.position.x;
-    yc = msg->pose.pose.position.y;
-    float zc = msg->pose.pose.position.z;
+    geometry_msgs::TransformStamped transformStamped;
+    try
+    {
+        transformStamped = tfBuffer.lookupTransform("map", "base_footprint", ros::Time(0));
+    }
+    catch (tf2::TransformException &ex)
+    {
+        ROS_WARN("TransformException: %s", ex.what());
+        throw ex;
+    }
 
-    // 方向
-    float qx = msg->pose.pose.orientation.x;
-    float qy = msg->pose.pose.orientation.y;
-    float qz = msg->pose.pose.orientation.z;
-    float qw = msg->pose.pose.orientation.w;
+    geometry_msgs::Transform tf = transformStamped.transform;
 
-    // 线速度
-    float linear_vx = msg->twist.twist.linear.x;
-    float linear_vy = msg->twist.twist.linear.y;
-    float linear_vz = msg->twist.twist.linear.z;
+    xc = tf.translation.x;
+    yc = tf.translation.y;
+    float zc = tf.translation.z;
 
-    vector<float> vect_vel = {linear_vx, linear_vy, linear_vz};
-    float linear_vel = norm(vect_vel);
-
-    // 角速度
-    float angular_vel = msg->twist.twist.angular.z;
+    float qx = tf.rotation.x;
+    float qy = tf.rotation.y;
+    float qz = tf.rotation.z;
+    float qw = tf.rotation.w;
 
     // 从四元数计算欧拉角
     tf::Quaternion quat(qx, qy, qz, qw);
@@ -126,8 +131,21 @@ void poseCallback(const nav_msgs::Odometry::ConstPtr &msg)
     mat.getEulerYPR(curr_yaw, curr_pitch, curr_roll);
 
     // 赋值给全局变量
-    vel = linear_vel;
     yaw = curr_yaw;
+}
+
+void velCallback(const nav_msgs::Odometry::ConstPtr &msg)
+{
+    // 线速度
+    float linear_vx = msg->twist.twist.linear.x;
+    float linear_vy = msg->twist.twist.linear.y;
+    float linear_vz = msg->twist.twist.linear.z;
+
+    vector<float> vect_vel = {linear_vx, linear_vy, linear_vz};
+    float linear_vel = norm(vect_vel);
+
+    // 赋值给全局变量
+    vel = linear_vel;
 }
 
 void globalPathCallback(const nav_msgs::Path::ConstPtr &msg)
@@ -160,7 +178,7 @@ float find_distance_index_based(int idx)
 int find_nearest_waypoint()
 {
     int nearest_idx = 0;
-    float smallest_dist = 0.;
+    float smallest_dist = numeric_limits<float>::max();
     float P = 2.;
     for (int i = 0; i < waypoints.size(); i++)
     {
@@ -168,11 +186,6 @@ int find_nearest_waypoint()
         float wpy = waypoints[i][1];
         float idx_dist = pow(xc - wpx, P) + pow(yc - wpy, P);
 
-        if (i == 0)
-        {
-            smallest_dist = idx_dist;
-            nearest_idx = i;
-        }
         if (idx_dist < smallest_dist)
         {
             smallest_dist = idx_dist;
@@ -262,6 +275,9 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     ros::NodeHandle nh_private("~");
 
+    tf2_ros::Buffer tfBuffer;
+    tf2_ros::TransformListener tfListener(tfBuffer);
+
     // 读取参数
     dynamic_reconfigure::Server<pure_pursuit_fp::PIDConfig> server;
     dynamic_reconfigure::Server<pure_pursuit_fp::PIDConfig>::CallbackType f;
@@ -269,7 +285,7 @@ int main(int argc, char **argv)
     server.setCallback(f);
 
     // 订阅者
-    ros::Subscriber controller_sub = nh.subscribe("odom", 1, poseCallback);
+    ros::Subscriber controller_sub = nh.subscribe("odom", 1, velCallback);
     ros::Subscriber path_sub = nh.subscribe("move_base/NavfnROS/plan", 1, globalPathCallback);
 
     // 发布者
@@ -277,6 +293,23 @@ int main(int argc, char **argv)
     ros::Publisher lookahead_pub = nh.advertise<geometry_msgs::PointStamped>("lookahead_point", 1);
 
     signal(SIGINT, signalHandler);
+
+    std::thread tfThread([&]() {
+        ros::Rate rate(50.0);
+        while (ros::ok())
+        {
+            try
+            {
+                // 填充 tf2 缓存
+                tfBuffer.canTransform("map", "base_footprint", ros::Time(0));
+            }
+            catch (tf2::TransformException &ex)
+            {
+                ROS_WARN("%s", ex.what());
+            }
+            rate.sleep();
+        }
+    });
 
     ros::Rate rate(control_rate);
     ros::spinOnce();
@@ -290,6 +323,8 @@ int main(int argc, char **argv)
             ros::spinOnce();
             continue;
         }
+
+        getCurPos(tfBuffer);
 
         if (nearest_idx < waypoints.size() - 1)
         {
