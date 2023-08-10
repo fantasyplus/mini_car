@@ -172,6 +172,8 @@
 
   <gazebo reference="caster_front_link">
     <turnGravityOff>false</turnGravityOff>
+    <mu1 value="0.0" />
+    <mu2 value="0.0" />
   </gazebo>
 
 
@@ -212,6 +214,8 @@
 
   <gazebo reference="caster_back_link">
     <turnGravityOff>false</turnGravityOff>
+    <mu1 value="0.0" />
+    <mu2 value="0.0" />
   </gazebo>
 
 
@@ -272,10 +276,10 @@
   <gazebo>
     <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
       <rosDebugLevel>Debug</rosDebugLevel>
-      <publishWheelTF>false</publishWheelTF>
+      <publishWheelTF>true</publishWheelTF>
       <robotNamespace>/</robotNamespace>
       <publishTf>1</publishTf>
-      <publishWheelJointState>false</publishWheelJointState>
+      <publishWheelJointState>true</publishWheelJointState>
       <alwaysOn>true</alwaysOn>
       <updateRate>100.0</updateRate>
       <leftJoint>front_left_wheel_joint</leftJoint>
@@ -288,7 +292,7 @@
       <commandTopic>cmd_vel</commandTopic>
       <odometryFrame>odom</odometryFrame>
       <odometryTopic>odom</odometryTopic>
-      <robotBaseFrame>base_footprint</robotBaseFrame>
+      <robotBaseFrame>base_link</robotBaseFrame>
     </plugin>
   </gazebo>
 

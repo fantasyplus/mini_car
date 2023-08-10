@@ -14,7 +14,7 @@
     <arg name="paused" value="$(arg paused)" />
     <arg name="use_sim_time" value="$(arg use_sim_time)" />
     <arg name="headless" value="$(arg headless)" />
-    <arg name="world_name" value="$(find racebot_gazebo)/worlds/room_mini.world"/>
+    <arg name="world_name" value="$(find racebot_gazebo)/worlds/room_mini.world" />
   </include>
 
   <!-- urdf xml robot description loaded on the Parameter Server-->
@@ -23,6 +23,16 @@
 
   <!-- Run a python script to the send a service call to gazebo_ros to spawn a URDF robot -->
   <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
-    args="-urdf -model diff_wheeled_robot -param robot_description" />
-    
+    args="-urdf -model racebot -param robot_description" />
+
+  <rosparam file="$(find racebot_control)/config/diffbot_control.yaml" command="load" />
+
+  <!-- load the controllers -->
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+    output="screen" ns="/racebot" args="joint_state_controller" />
+
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+    <param name="publish_frequency" type="double" value="30.0" />
+    <remap from="/joint_states" to="/racebot/joint_states" />
+  </node>
 </launch>
