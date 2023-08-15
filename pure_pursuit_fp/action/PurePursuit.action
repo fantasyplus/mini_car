@@ -1,0 +1,9 @@
+#goal definition
+nav_msgs/Path GlobalPath
+---
+#result definition
+bool is_success
+---
+#feedback
+float32 vel
+float32 yaw

@@ -18,4 +18,7 @@
   <depend>dynamic_reconfigure</depend>
   <depend>tf2</depend>
   <depend>tf2_ros</depend>
+  <depend>message_generation</depend>
+  <depend>actionlib_msgs</depend>
+  <depend>nav_msgs</depend>
 </package>
