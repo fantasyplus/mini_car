@@ -1,6 +1,7 @@
 <launch>
-    <node pkg="pure_pursuit_fp" type="pure_pursuit_server" name="pure_pursuit_server" output="screen">
+    <!-- <node pkg="pure_pursuit_fp" type="pure_pursuit_server" name="pure_pursuit_server" output="screen">
     </node>
     <node pkg="pure_pursuit_fp" type="pure_pursuit_client" name="pure_pursuit_client" output="screen">
-    </node>
+    </node> -->
+    <node pkg="pure_pursuit_fp" type="pure_pursuit_fp_class" name="pure_pursuit_fp_class" output="screen"/>
 </launch>
