@@ -16,7 +16,7 @@ frame_name  = "odom"
 child_frame_name = "base_footprint"
 pub_name    = "odom_topic"
 imu_name    = "imu_data"
-joint_states_name   = "/racebot/joint_states"
+joint_states_name   = "/car/joint_states"
 # 定义起始坐标
 start_x     = -0.5
 start_y     = 0

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(racebot_gazebo)
+project(car_gazebo)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp

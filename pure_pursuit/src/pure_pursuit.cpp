@@ -27,7 +27,7 @@
 // dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
 #include "geometry_msgs/Transform.h"
-#include "pure_pursuit_fp/PIDConfig.h"
+#include "pure_pursuit/PIDConfig.h"
 
 #define _USE_MATH_DEFINES
 
@@ -86,7 +86,7 @@ float norm(vector<float> vect)
     return sqrt(sum);
 }
 
-void reconfigureCallback(pure_pursuit_fp::PIDConfig &config, uint32_t level)
+void reconfigureCallback(pure_pursuit::PIDConfig &config, uint32_t level)
 {
     control_rate = config.control_rate;
     look_head_dis = config.min_ld;
@@ -279,8 +279,8 @@ int main(int argc, char **argv)
     tf2_ros::TransformListener tfListener(tfBuffer);
 
     // 读取参数
-    dynamic_reconfigure::Server<pure_pursuit_fp::PIDConfig> server;
-    dynamic_reconfigure::Server<pure_pursuit_fp::PIDConfig>::CallbackType f;
+    dynamic_reconfigure::Server<pure_pursuit::PIDConfig> server;
+    dynamic_reconfigure::Server<pure_pursuit::PIDConfig>::CallbackType f;
     f = boost::bind(&reconfigureCallback, _1, _2);
     server.setCallback(f);
 
@@ -318,7 +318,7 @@ int main(int argc, char **argv)
     {
         if (!get_path)
         {
-            ROS_INFO("...wait for path...");
+            ROS_INFO("wait path...");
             this_thread::sleep_for(chrono::milliseconds(1000));
             ros::spinOnce();
             continue;
@@ -330,7 +330,7 @@ int main(int argc, char **argv)
         {
             PurePursuit(lookahead_pub);
             vel_pub.publish(msg);
-            ROS_INFO_STREAM("[velo,yaw] = [" << msg.linear.x << "," << msg.angular.z << "]");
+            ROS_INFO("speed:%f,yaw:%f",msg.linear.x,msg.angular.z);
 
             // 等待直到下一次迭代。
             ros::spinOnce();

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>pure_pursuit_fp</name>
+  <name>pure_pursuit</name>
   <version>0.0.0</version>
   <description>The pure_pursuit package</description>
 
@@ -18,7 +18,5 @@
   <depend>dynamic_reconfigure</depend>
   <depend>tf2</depend>
   <depend>tf2_ros</depend>
-  <depend>message_generation</depend>
-  <depend>actionlib_msgs</depend>
   <depend>nav_msgs</depend>
 </package>

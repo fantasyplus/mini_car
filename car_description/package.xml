@@ -1,7 +1,7 @@
 <package format="2">
-  <name>racebot_description</name>
+  <name>car_description</name>
   <version>1.0.0</version>
-  <description>URDF Description package for racebot_description</description>
+  <description>URDF Description package for car_description</description>
   <author>TODO</author>
   <maintainer email="fantasyplus123@gmail.com"></maintainer>
   <license>TODO</license>
