@@ -13,7 +13,7 @@
     <node name="map_server" pkg="map_server" type="map_server" args="$(find racebot_gazebo)/map/$(arg map)"/>
 
     <!-- 运行move_base节点 -->
-    <include file="$(find racebot_gazebo)/launch/base_launch/teb_base_diff.launch"/>
+    <include file="$(find racebot_gazebo)/launch/base_launch/move_base_diff.launch"/>
 
     <!-- 启动AMCL节点 -->
     <include file="$(find racebot_gazebo)/launch/base_launch/amcl.launch" />

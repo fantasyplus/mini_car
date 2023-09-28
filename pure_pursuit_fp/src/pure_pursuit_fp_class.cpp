@@ -53,7 +53,7 @@ private:
     int idx;
     float xc, yc, vel, yaw, v_prev_error;
     bool get_path;
-    vector<vector<float>> waypoints;
+    vector<geometry_msgs::PoseStamped> waypoints;
 
     geometry_msgs::Twist msg;
 
@@ -77,7 +77,7 @@ public:
         server.setCallback(f);
 
         controller_sub = nh.subscribe("odom", 1, &PurePursuitController::velCallback, this);
-        path_sub = nh.subscribe("move_base/NavfnROS/plan", 1, &PurePursuitController::globalPathCallback, this);
+        path_sub = nh.subscribe("global_planner", 1, &PurePursuitController::globalPathCallback, this);
         vel_pub = nh.advertise<geometry_msgs::Twist>("new_cmd_vel", 1);
         lookahead_pub = nh.advertise<geometry_msgs::PointStamped>("lookahead_point", 1);
 
@@ -188,14 +188,7 @@ private:
 
     void globalPathCallback(const nav_msgs::Path::ConstPtr &msg)
     {
-        waypoints.clear();
-        for (int i = 0; i < msg->poses.size(); i++)
-        {
-            vector<float> wp;
-            wp.push_back(msg->poses[i].pose.position.x);
-            wp.push_back(msg->poses[i].pose.position.y);
-            waypoints.push_back(wp);
-        }
+        waypoints = msg->poses;
         get_path = true;
     }
 
@@ -254,8 +247,8 @@ private:
 
     float find_distance_index_based(int idx)
     {
-        float x1 = waypoints[idx][0];
-        float y1 = waypoints[idx][1];
+        float x1 = waypoints[idx].pose.position.x;
+        float y1 = waypoints[idx].pose.position.y;
         return find_distance(x1, y1);
     }
 
@@ -266,8 +259,8 @@ private:
         float P = 2.;
         for (int i = 0; i < waypoints.size(); i++)
         {
-            float wpx = waypoints[i][0];
-            float wpy = waypoints[i][1];
+            float wpx = waypoints[i].pose.position.x;
+            float wpy = waypoints[i].pose.position.y;
             float idx_dist = pow(xc - wpx, P) + pow(yc - wpy, P);
 
             if (idx_dist < smallest_dist)
@@ -297,8 +290,8 @@ private:
         // 获取最近的路径点
         nearest_idx = find_nearest_waypoint();
         idx = idx_close_to_lookahead(nearest_idx);
-        float target_x = waypoints[idx][0];
-        float target_y = waypoints[idx][1];
+        float target_x = waypoints[idx].pose.position.x;
+        float target_y = waypoints[idx].pose.position.y;
 
         // 视觉前视点
         geometry_msgs::PointStamped lookhead_point;

@@ -7,8 +7,9 @@ Panels:
         - /Global Options1
         - /TF1/Tree1
         - /RobotModel1/Links1/base_footprint1
+        - /Global Plan1
       Splitter Ratio: 0.5823529362678528
-    Tree Height: 363
+    Tree Height: 372
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -211,7 +212,7 @@ Visualization Manager:
       Radius: 0.029999999329447746
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
-      Topic: /move_base/TebLocalPlannerROS/global_plan
+      Topic: /global_planner
       Unreliable: false
       Value: true
     - Alpha: 1
@@ -422,5 +423,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 884
-  X: 1587
-  Y: 182
+  X: 1075
+  Y: 36

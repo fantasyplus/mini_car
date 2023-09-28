@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<launch>
+
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="log"
+    clear_params="true">
+
+    <rosparam file="$(find racebot_gazebo)/config/costmap_common_params.yaml" command="load"
+      ns="global_costmap" />
+    <rosparam file="$(find racebot_gazebo)/config/costmap_common_params.yaml" command="load"
+      ns="local_costmap" />
+    <rosparam file="$(find racebot_gazebo)/config/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find racebot_gazebo)/config/global_costmap_params.yaml" command="load" />
+
+    <rosparam file="$(find racebot_gazebo)/config/move_base_params.yaml" command="load" />
+    <rosparam file="$(find racebot_gazebo)/config/base_global_planner_params.yaml"
+      command="load" />
+
+    <remap from="move_base/NavfnROS/plan" to="global_planner"/>
+  </node>
+
+  <include file="$(find pure_pursuit_fp)/launch/pure_pursuit_fp.launch" />
+
+  <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="rqt_reconfigure" output="screen" />
+</launch> 
